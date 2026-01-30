@@ -1,18 +1,27 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
-import tailwindcss from "tailwindcss";
+import { defineConfig } from "vite"
+import react from "@vitejs/plugin-react-swc"
+import path from "path"
+import { fileURLToPath } from "url"
+import tailwindcss from "@tailwindcss/vite"
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.resolve(__dirname, "./src")
 
 // https://vite.dev/config/
 export default defineConfig({
-  server: {
-    proxy: {
-      "/api": {
-        target: "http://localhost:3000", 
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""),
-      },
+    plugins: [react(), tailwindcss()],
+    resolve: {
+        alias: {
+            "@": path.resolve(__dirname, "./src"),
+            "@/components/*": path.resolve(__dirname, "./src/components"),
+        },
     },
-  },
-
-  plugins: [react(), tailwindcss()],
-});
+    server: {
+        proxy: {
+            "/api": {
+                target: "http://localhost:3000",
+                changeOrigin: true,
+            },
+        },
+    },
+})
