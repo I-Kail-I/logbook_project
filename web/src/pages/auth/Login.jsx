@@ -113,7 +113,7 @@ export default function Login() {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-12 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-70 font-poppins"
+                className="w-full h-12 bg-linear-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-70 font-poppins"
               >
                 {isLoading ? "Memproses..." : "Login"}
               </Button>

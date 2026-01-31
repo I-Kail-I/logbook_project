@@ -1,0 +1,1 @@
+ALTER TABLE "book_save" ADD COLUMN "status" boolean;

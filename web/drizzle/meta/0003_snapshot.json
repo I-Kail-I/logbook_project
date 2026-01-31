@@ -1,6 +1,6 @@
 {
-  "id": "3942386c-6ed8-4b3b-bb74-d6c5856c5f69",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "68ad5a22-5ac2-4305-bd4d-74e0d4ebd2be",
+  "prevId": "29801781-f7ed-4b05-9421-c781542bda5e",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -18,13 +18,14 @@
           "name": "username_id",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "tanggal": {
           "name": "tanggal",
-          "type": "date",
+          "type": "timestamp",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": "now()"
         },
         "deskripsi_pekerjaan": {
           "name": "deskripsi_pekerjaan",
@@ -34,9 +35,10 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "date",
+          "type": "timestamp",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": "now()"
         }
       },
       "indexes": {},
@@ -45,8 +47,12 @@
           "name": "book_save_username_id_fkey",
           "tableFrom": "book_save",
           "tableTo": "users",
-          "columnsFrom": ["username_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "username_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -61,8 +67,8 @@
       "name": "log_user",
       "schema": "",
       "columns": {
-        "user_id": {
-          "name": "user_id",
+        "username_id": {
+          "name": "username_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -80,8 +86,12 @@
           "name": "log_user_book_save_id_fkey",
           "tableFrom": "log_user",
           "tableTo": "book_save",
-          "columnsFrom": ["book_save_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "book_save_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -89,8 +99,12 @@
           "name": "log_user_user_id_fkey",
           "tableFrom": "log_user",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "username_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -115,26 +129,33 @@
           "name": "nip",
           "type": "varchar(18)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "username": {
           "name": "username",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "password": {
           "name": "password",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "role": {
           "name": "role",
           "type": "users_role",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": "'user'"
+        },
+        "user_profile": {
+          "name": "user_profile",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
         }
       },
       "indexes": {},
@@ -150,7 +171,10 @@
     "public.users_role": {
       "name": "users_role",
       "schema": "public",
-      "values": ["admin", "user"]
+      "values": [
+        "admin",
+        "user"
+      ]
     }
   },
   "schemas": {},

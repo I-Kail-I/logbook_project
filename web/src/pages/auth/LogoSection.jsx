@@ -1,4 +1,4 @@
-import Logo from "../../assets/logo.png";
+import Logo from "../../assets/logo.png"
 
 export default function LogoSection() {
   return (
@@ -10,5 +10,5 @@ export default function LogoSection() {
         LOGBOOK
       </h1>
     </div>
-  );
+  )
 }

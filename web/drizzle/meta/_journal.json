@@ -8,6 +8,41 @@
       "when": 1769783661794,
       "tag": "0000_intiliaze",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1769828301546,
+      "tag": "0001_changing_from_date_to_timestamp",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1769830352987,
+      "tag": "0002_creating_profile_field_in_users_table_with_base64",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1769834449558,
+      "tag": "0003_fixing_name_on_log_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1769836235030,
+      "tag": "0004_adding_judul_in_booksave",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1769837131822,
+      "tag": "0005_adding_status_field_in_booksave",
+      "breakpoints": true
     }
   ]
 }

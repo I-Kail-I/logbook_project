@@ -13,17 +13,14 @@ import process from "node:process"
 
 export async function loginController(req, res) {
   /**
-   * Making login controller
+   * login controller
    * method: POST
-   * I made it with several conditions
+   * Login controller, with several conditions
    */
   try {
     const { nip, password } = req.body
 
-    const user = await db
-      .select()
-      .from(users)
-      .where(eq(users.nip, nip))
+    const user = await db.select().from(users).where(eq(users.nip, nip))
 
     if (user.length === 0) {
       return res.status(400).json({
@@ -36,11 +33,13 @@ export async function loginController(req, res) {
         })
       } else {
         const payload = { id: user[0].id, nip: user[0].nip }
-        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" })
+        const token = jwt.sign(payload, process.env.JWT_SECRET, {
+          expiresIn: "1h",
+        })
 
         return res.status(200).json({
           message: "Login berhasil",
-          token,          
+          token,
           data: user,
         })
       }
