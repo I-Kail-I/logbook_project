@@ -1,7 +1,20 @@
-import { Router } from "express";
+import { loginController } from "../controllers/loginController.js"
+import authRouter from "./auth.js"
+import { authenticate } from "../middlewares/authenticate.js"
+import { getUser } from "../controllers/userController..js"
 
-const router = Router();
+import { notFound } from "../controllers/notFound.js"
+import { Router } from "express"
 
-router.post("/register");
+const router = Router()
 
-export default router;
+// Auth routes
+router.post("/login", loginController)          
+router.use("/auth", authRouter)                 
+router.get("/protected", authenticate, (req, res) => {
+  res.json({ msg: "Secret area", user: req.user })   
+})
+router.get("/profile", authenticate, getUser)
+router.use(notFound)
+
+export default router
