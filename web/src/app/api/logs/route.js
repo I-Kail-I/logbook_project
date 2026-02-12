@@ -39,12 +39,6 @@ export async function POST(req) {
     const { judul, deskripsiPekerjaan, status, tanggal, usernameId, fileUrl } =
       await req.json()
 
-    console.log("Creating log for user:", userId, "with data:", {
-      judul,
-      status,
-      tanggal,
-    })
-
     // Create new log entry
     const newLog = await db
       .insert(bookSave)

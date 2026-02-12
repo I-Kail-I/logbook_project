@@ -90,7 +90,6 @@ export default function UpdateLogCard({
         }
       )
 
-      console.log("Log updated:", response.data)
       onSuccess(response.data)
     } catch (err) {
       console.error("Error updating log:", err)
@@ -109,7 +108,6 @@ export default function UpdateLogCard({
         withCredentials: true,
       })
 
-      console.log("Log deleted:", formData.id)
       onSuccess({ deleted: true, id: formData.id })
     } catch (err) {
       console.error("Error deleting log:", err)

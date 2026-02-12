@@ -95,12 +95,10 @@ function LogActivityContent() {
 
   /* ---------- Handlers ---------- */
   const handleCreateSuccess = (newLog) => {
-    console.log("Log created successfully:", newLog)
     router.push("/dashboard")
   }
 
   const handleUpdateSuccess = (updatedLog) => {
-    console.log("Log updated successfully:", updatedLog)
     router.push("/riwayat")
   }
 

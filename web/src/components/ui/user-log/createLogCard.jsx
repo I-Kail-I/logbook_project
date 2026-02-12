@@ -66,7 +66,6 @@ export default function CreateLogCard({ onSuccess, onCancel, userId }) {
         }
       )
 
-      console.log("Log created:", response.data)
       onSuccess(response.data)
     } catch (err) {
       console.error("Error creating log:", err)

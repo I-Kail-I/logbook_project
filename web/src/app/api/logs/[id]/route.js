@@ -42,14 +42,6 @@ export async function PUT(req, { params }) {
     const logId = parseInt(id, 10)
     const { judul, deskripsiPekerjaan, status, tanggal, fileUrl } = await req.json()
 
-    console.log("Updating log:", logId, "for user:", userId, "with data:", {
-      judul,
-      deskripsiPekerjaan,
-      status,
-      tanggal,
-      fileUrl,
-    })
-
     // Update log entry
     const updatedLog = await db
       .update(bookSave)
@@ -67,8 +59,6 @@ export async function PUT(req, { params }) {
     if (!updatedLog.length) {
       return NextResponse.json({ message: "Log not found" }, { status: 404 })
     }
-
-    console.log("Log updated successfully:", updatedLog[0])
 
     return NextResponse.json({
       message: "Log updated successfully",
@@ -123,8 +113,6 @@ export async function DELETE(req, { params }) {
     const { id } = await params
     const logId = parseInt(id, 10)
 
-    console.log("Deleting log:", logId, "for user:", userId)
-
     // Soft delete log entry
     const deletedLog = await db
       .update(bookSave)
@@ -138,8 +126,6 @@ export async function DELETE(req, { params }) {
     if (!deletedLog.length) {
       return NextResponse.json({ message: "Log not found" }, { status: 404 })
     }
-
-    console.log("Log deleted successfully:", deletedLog[0])
 
     return NextResponse.json({
       message: "Log deleted successfully",
