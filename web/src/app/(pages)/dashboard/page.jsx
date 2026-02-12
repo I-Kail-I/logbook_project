@@ -168,9 +168,9 @@ export default function Dashboard() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/30 to-slate-50 font-sans pb-28 lg:pb-8">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-orange-50/30 to-slate-50 font-sans pb-28 lg:pb-8">
       {/* Header */}
-      <div className="bg-gradient-to-r from-orange-500 to-amber-500 sticky top-0 z-30 shadow-lg shadow-orange-500/10">
+      <div className="bg-linear-to-r from-orange-500 to-amber-500 sticky top-0 z-30 shadow-lg shadow-orange-500/10">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-6 lg:py-8">
           <div className="flex items-start justify-between">
             <div className="flex-1">
@@ -240,8 +240,8 @@ export default function Dashboard() {
             </div>
 
             {/* Quick Action */}
-            <Card className="bg-gradient-to-br from-orange-500 via-orange-600 to-amber-500 border-0 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 overflow-hidden relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+            <Card className="bg-linear-to-br from-orange-500 via-orange-600 to-amber-500 border-0 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 overflow-hidden relative group">
+              <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
               <CardContent className="p-6 lg:p-8 flex items-center justify-between relative z-10">
                 <div className="space-y-2 lg:space-y-3 flex-1">
                   <div className="flex items-center gap-2">
@@ -268,7 +268,7 @@ export default function Dashboard() {
           <div className="lg:col-span-7">
             <Card className="border-slate-200 shadow-md overflow-hidden">
               <CardContent className="p-0">
-                <div className="bg-gradient-to-r from-slate-50 to-blue-50 p-4 lg:p-6 border-b border-slate-200">
+                <div className="bg-linear-to-r from-slate-50 to-blue-50 p-4 lg:p-6 border-b border-slate-200">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3 lg:gap-4">
                       <div className="p-2 lg:p-3 rounded-xl bg-blue-100">

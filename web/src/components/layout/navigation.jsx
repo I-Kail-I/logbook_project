@@ -37,7 +37,7 @@ export default function Navigation() {
             <div className="absolute inset-0 bg-orange-500/30 rounded-full blur-xl" />
             <Button
               onClick={handleCreateLog}
-              className="relative h-16 w-16 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-2xl shadow-orange-600/40 border-4 border-white transition-all duration-300 hover:scale-110 hover:rotate-90"
+              className="relative h-16 w-16 rounded-full bg-linear-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-2xl shadow-orange-600/40 border-4 border-white transition-all duration-300 hover:scale-110 hover:rotate-90"
             >
               <Plus className="w-7 h-7" />
             </Button>
