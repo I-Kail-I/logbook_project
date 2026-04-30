@@ -38,6 +38,18 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Inter-Bold.ttf",
+            "./assets/fonts/Inter-ExtraBold.ttf",
+            "./assets/fonts/ABeeZee-Regular.ttf",
+            "./assets/fonts/Magra-Regular.ttf",
+            "./assets/fonts/Magra-Bold.ttf"
+          ]
+        }
       ]
     ],
     "experiments": {
