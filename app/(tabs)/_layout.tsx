@@ -1,35 +1,72 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
+import { Tabs } from "expo-router";
+import { LayoutGrid, BookOpen, Settings } from "lucide-react-native";
+import { View, StyleSheet } from "react-native";
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+const ORANGE = "#F5A623";
+const ORANGE_DARK = "#E08A0E";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
+        tabBarStyle: styles.tabBar,
+        tabBarActiveTintColor: ORANGE,
+        tabBarInactiveTintColor: "#999",
+        tabBarShowLabel: false,
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <View style={[styles.iconContainer, color === ORANGE && styles.iconActive]}>
+              <LayoutGrid size={24} color={color === ORANGE ? "#fff" : color} />
+            </View>
+          ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="logbook"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <BookOpen size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Settings size={24} color={color} />
+          ),
         }}
       />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBar: {
+    height: 70,
+    paddingBottom: 10,
+    paddingTop: 10,
+    backgroundColor: "#fff",
+    borderTopWidth: 0,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+  },
+  iconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  iconActive: {
+    backgroundColor: ORANGE,
+  },
+});
