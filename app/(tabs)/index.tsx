@@ -1,26 +1,8 @@
-import { useRouter } from "expo-router";
 import { useFonts } from "expo-font";
+import { useRouter } from "expo-router";
+import { BarChart3, Bell, Calendar, Clock, FileText, Plus, Printer } from "lucide-react-native";
 import React from "react";
-import {
-  Dimensions,
-  Image,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import {
-  Calendar,
-  Bell,
-  Plus,
-  BarChart3,
-  FileText,
-  Printer,
-  Clock,
-  CheckCircle2,
-} from "lucide-react-native";
+import { Dimensions, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const { width: W, height: H } = Dimensions.get("window");
 

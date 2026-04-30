@@ -3,7 +3,6 @@ import { LayoutGrid, BookOpen, Settings } from "lucide-react-native";
 import { View, StyleSheet } from "react-native";
 
 const ORANGE = "#F5A623";
-const ORANGE_DARK = "#E08A0E";
 
 export default function TabLayout() {
   return (

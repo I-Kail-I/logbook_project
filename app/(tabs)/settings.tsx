@@ -1,5 +1,18 @@
 import { useFonts } from "expo-font";
-import { Bell, ChevronRight, Globe, HelpCircle, Lock, LogOut, Palette, Sun, User, X } from "lucide-react-native";
+import { useRouter } from "expo-router";
+import {
+    ArrowLeft,
+    Bell,
+    ChevronRight,
+    Globe,
+    HelpCircle,
+    Lock,
+    LogOut,
+    Palette,
+    Sun,
+    User,
+    X,
+} from "lucide-react-native";
 import React, { useState } from "react";
 import {
     Modal,
@@ -29,6 +42,7 @@ const C = {
 };
 
 export default function SettingsScreen() {
+  const router = useRouter();
   const [fontsLoaded] = useFonts({
     "Inter-Bold": require("@/assets/fonts/Inter-Bold.ttf"),
     "Inter-ExtraBold": require("@/assets/fonts/Inter-ExtraBold.ttf"),
@@ -39,7 +53,6 @@ export default function SettingsScreen() {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [notifications, setNotifications] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
 
   const [profileData, setProfileData] = useState({
     nama: "",
@@ -85,6 +98,11 @@ export default function SettingsScreen() {
 
       {/* Header */}
       <View style={s.header}>
+        <View style={s.headerTop}>
+          <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
+            <ArrowLeft size={24} color={C.white} />
+          </TouchableOpacity>
+        </View>
         <Text style={s.headerTitle}>Pengaturan</Text>
         <Text style={s.headerSubtitle}>Kelola akun dan preferensi aplikasi</Text>
       </View>
@@ -125,20 +143,6 @@ export default function SettingsScreen() {
                   onValueChange={setNotifications}
                   trackColor={{ false: "#E0E0E0", true: C.orangeLight }}
                   thumbColor={notifications ? C.orange : "#fff"}
-                />
-              }
-            />
-            <View style={s.divider} />
-            <SettingItem
-              icon={Sun}
-              title="Mode Gelap"
-              subtitle="Aktifkan tampilan gelap"
-              rightElement={
-                <Switch
-                  value={darkMode}
-                  onValueChange={setDarkMode}
-                  trackColor={{ false: "#E0E0E0", true: C.orangeLight }}
-                  thumbColor={darkMode ? C.orange : "#fff"}
                 />
               }
             />
@@ -320,6 +324,19 @@ const s = StyleSheet.create({
     paddingBottom: 30,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
+  },
+  headerTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   headerTitle: {
     fontSize: 24,

@@ -1,17 +1,18 @@
 import * as DocumentPicker from "expo-document-picker";
 import { useFonts } from "expo-font";
-import { ChevronLeft, ChevronRight, Clock, FileText, Plus, X } from "lucide-react-native";
+import { useRouter } from "expo-router";
+import { ArrowLeft, ChevronLeft, ChevronRight, Clock, FileText, Plus, X } from "lucide-react-native";
 import React, { useState } from "react";
 import {
-  Dimensions,
-  Modal,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Dimensions,
+    Modal,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const { width: W } = Dimensions.get("window");
@@ -34,6 +35,7 @@ const C = {
 const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
 export default function LogbookScreen() {
+  const router = useRouter();
   const [fontsLoaded] = useFonts({
     "Inter-Bold": require("@/assets/fonts/Inter-Bold.ttf"),
     "Inter-ExtraBold": require("@/assets/fonts/Inter-ExtraBold.ttf"),
@@ -125,6 +127,11 @@ export default function LogbookScreen() {
 
       {/* Header */}
       <View style={s.header}>
+        <View style={s.headerTop}>
+          <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
+            <ArrowLeft size={24} color={C.white} />
+          </TouchableOpacity>
+        </View>
         <Text style={s.headerTitle}>Logbook Saya</Text>
         <Text style={s.headerSubtitle}>Catat Aktifitas</Text>
       </View>
@@ -314,6 +321,19 @@ const s = StyleSheet.create({
     paddingBottom: 25,
     borderBottomLeftRadius: 25,
     borderBottomRightRadius: 25,
+  },
+  headerTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   headerTitle: {
     fontSize: 24,
