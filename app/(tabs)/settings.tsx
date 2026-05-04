@@ -279,7 +279,7 @@ export default function SettingsScreen() {
                   style={s.input}
                   value={passwordData.new}
                   onChangeText={(text) => setPasswordData({ ...passwordData, new: text })}
-                  placeholder="Password456"
+                  placeholder="Password baru"
                   placeholderTextColor={C.textLight}
                   secureTextEntry
                 />
@@ -291,7 +291,7 @@ export default function SettingsScreen() {
                   style={s.input}
                   value={passwordData.confirm}
                   onChangeText={(text) => setPasswordData({ ...passwordData, confirm: text })}
-                  placeholder=""
+                  placeholder="Masukkan password baru"
                   placeholderTextColor={C.textLight}
                   secureTextEntry
                 />
