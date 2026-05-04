@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
-import { LayoutGrid, BookOpen, Settings } from "lucide-react-native";
-import { View, StyleSheet } from "react-native";
+import { BookOpen, LayoutGrid, Settings } from "lucide-react-native";
+import { StyleSheet, View } from "react-native";
 
 const ORANGE = "#F5A623";
 
@@ -19,7 +19,12 @@ export default function TabLayout() {
         name="index"
         options={{
           tabBarIcon: ({ color, size }) => (
-            <View style={[styles.iconContainer, color === ORANGE && styles.iconActive]}>
+            <View
+              style={[
+                styles.iconContainer,
+                color === ORANGE && styles.iconActive,
+              ]}
+            >
               <LayoutGrid size={24} color={color === ORANGE ? "#fff" : color} />
             </View>
           ),
@@ -28,17 +33,19 @@ export default function TabLayout() {
       <Tabs.Screen
         name="logbook"
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <BookOpen size={24} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <BookOpen size={24} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="statistik"
+        options={{
+          href: null,
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <Settings size={24} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Settings size={24} color={color} />,
         }}
       />
     </Tabs>
