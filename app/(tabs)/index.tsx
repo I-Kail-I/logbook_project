@@ -1,8 +1,25 @@
 import { useFonts } from "expo-font";
 import { useRouter } from "expo-router";
-import { BarChart3, Bell, Calendar, Clock, FileText, Plus, Printer } from "lucide-react-native";
-import React from "react";
-import { Dimensions, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+    BarChart3,
+    Bell,
+    Calendar,
+    Clock,
+    FileText,
+    Plus,
+    Printer,
+} from "lucide-react-native";
+import React, { useEffect, useRef } from "react";
+import {
+    Animated,
+    Dimensions,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 
 const { width: W, height: H } = Dimensions.get("window");
 
@@ -41,6 +58,23 @@ const ACTIVITIES = [
 
 export default function DashboardScreen() {
   const router = useRouter();
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
   const [fontsLoaded] = useFonts({
     "Inter-Bold": require("@/assets/fonts/Inter-Bold.ttf"),
@@ -62,99 +96,121 @@ export default function DashboardScreen() {
       <StatusBar barStyle="light-content" backgroundColor={C.orange} />
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header Section */}
-        <View style={s.header}>
-          {/* Date & Notification */}
-          <View style={s.headerTop}>
-            <View style={s.dateRow}>
-              <Calendar size={18} color={C.white} />
-              <Text style={s.dateText}>{today}</Text>
+        <Animated.View
+          style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}
+        >
+          {/* Header Section */}
+          <View style={s.header}>
+            {/* Date & Notification */}
+            <View style={s.headerTop}>
+              <View style={s.dateRow}>
+                <Calendar size={18} color={C.white} />
+                <Text style={s.dateText}>{today}</Text>
+              </View>
+              <TouchableOpacity style={s.bellBtn}>
+                <Bell size={20} color={C.white} />
+                <View style={s.bellBadge} />
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity style={s.bellBtn}>
-              <Bell size={20} color={C.white} />
-              <View style={s.bellBadge} />
-            </TouchableOpacity>
-          </View>
 
-          {/* User Profile */}
-          <View style={s.userRow}>
-            <View style={s.avatar}>
-              <View style={s.avatarInner}>
-                <Text style={s.avatarText}>R</Text>
-              </View>
-            </View>
-            <View style={s.greeting}>
-              <Text style={s.greetingText}>Selamat Pagi</Text>
-              <Text style={s.userName}>RAJAMUDA ASDI</Text>
-            </View>
-          </View>
-
-          {/* Action Cards */}
-          <View style={s.actionCards}>
-            <TouchableOpacity style={s.actionCard}>
-              <View style={[s.actionIcon, { backgroundColor: C.orangeLight }]}>
-                <Plus size={24} color={C.orangeDark} />
-              </View>
-              <View>
-                <Text style={s.actionTitle}>Tambah Log</Text>
-                <Text style={s.actionSubtitle}>Catat aktivitas</Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={s.actionCard}>
-              <View style={[s.actionIcon, { backgroundColor: "#E8D5F7" }]}>
-                <BarChart3 size={24} color="#8B5CF6" />
-              </View>
-              <View>
-                <Text style={s.actionTitle}>Statistika</Text>
-                <Text style={s.actionSubtitle}>Lihat Laporan</Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Content Section */}
-        <View style={s.content}>
-          {/* Section Header */}
-          <View style={s.sectionHeader}>
-            <View style={s.sectionTitleRow}>
-              <FileText size={20} color={C.orange} />
-              <Text style={s.sectionTitle}>Aktivitas Hari ini</Text>
-            </View>
-            <TouchableOpacity>
-              <Printer size={20} color={C.textGray} />
-            </TouchableOpacity>
-          </View>
-          <Text style={s.sectionDate}>{today}</Text>
-
-          {/* Activity Cards */}
-          {ACTIVITIES.map((item) => (
-            <View key={item.id} style={s.activityCard}>
-              <View style={s.activityHeader}>
-                <View style={s.activityTimeRow}>
-                  <Clock size={14} color={C.textLight} />
-                  <Text style={s.activityTime}>{item.time}</Text>
-                </View>
-                <View style={s.statusBadge}>
-                  <Text style={s.statusText}>{item.status}</Text>
+            {/* User Profile */}
+            <View style={s.userRow}>
+              <View style={s.avatar}>
+                <View style={s.avatarInner}>
+                  <Text style={s.avatarText}>R</Text>
                 </View>
               </View>
-
-              <View style={s.activityBody}>
-                <View style={[s.activityIcon, { backgroundColor: item.iconColor }]}>
-                  <FileText size={20} color={C.white} />
-                </View>
-                <View style={s.activityContent}>
-                  <Text style={s.activityTitle}>{item.title}</Text>
-                  <Text style={s.activityDesc}>{item.desc}</Text>
-                </View>
+              <View style={s.greeting}>
+                <Text style={s.greetingText}>Selamat Pagi</Text>
+                <Text style={s.userName}>RAJAMUDA ASDI</Text>
               </View>
             </View>
-          ))}
 
-          {/* Bottom spacing for tab bar */}
-          <View style={{ height: 100 }} />
-        </View>
+            {/* Action Cards */}
+            <View style={s.actionCards}>
+              <TouchableOpacity
+                style={s.actionCard}
+                onPress={() =>
+                  router.push({
+                    pathname: "/(tabs)/logbook",
+                    params: { openModal: "true" },
+                  })
+                }
+              >
+                <View
+                  style={[s.actionIcon, { backgroundColor: C.orangeLight }]}
+                >
+                  <Plus size={24} color={C.orangeDark} />
+                </View>
+                <View>
+                  <Text style={s.actionTitle}>Tambah Log</Text>
+                  <Text style={s.actionSubtitle}>Catat aktivitas</Text>
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={s.actionCard}
+                onPress={() => router.push("/(tabs)/statistik")}
+              >
+                <View style={[s.actionIcon, { backgroundColor: "#E8D5F7" }]}>
+                  <BarChart3 size={24} color="#8B5CF6" />
+                </View>
+                <View>
+                  <Text style={s.actionTitle}>Statistika</Text>
+                  <Text style={s.actionSubtitle}>Lihat Laporan</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Content Section */}
+          <View style={s.content}>
+            {/* Section Header */}
+            <View style={s.sectionHeader}>
+              <View style={s.sectionTitleRow}>
+                <FileText size={20} color={C.orange} />
+                <Text style={s.sectionTitle}>Aktivitas Hari ini</Text>
+              </View>
+              <TouchableOpacity>
+                <Printer size={20} color={C.textGray} />
+              </TouchableOpacity>
+            </View>
+            <Text style={s.sectionDate}>{today}</Text>
+
+            {/* Activity Cards */}
+            {ACTIVITIES.map((item) => (
+              <View key={item.id} style={s.activityCard}>
+                <View style={s.activityHeader}>
+                  <View style={s.activityTimeRow}>
+                    <Clock size={14} color={C.textLight} />
+                    <Text style={s.activityTime}>{item.time}</Text>
+                  </View>
+                  <View style={s.statusBadge}>
+                    <Text style={s.statusText}>{item.status}</Text>
+                  </View>
+                </View>
+
+                <View style={s.activityBody}>
+                  <View
+                    style={[
+                      s.activityIcon,
+                      { backgroundColor: item.iconColor },
+                    ]}
+                  >
+                    <FileText size={20} color={C.white} />
+                  </View>
+                  <View style={s.activityContent}>
+                    <Text style={s.activityTitle}>{item.title}</Text>
+                    <Text style={s.activityDesc}>{item.desc}</Text>
+                  </View>
+                </View>
+              </View>
+            ))}
+
+            {/* Bottom spacing for tab bar */}
+            <View style={{ height: 100 }} />
+          </View>
+        </Animated.View>
       </ScrollView>
     </View>
   );

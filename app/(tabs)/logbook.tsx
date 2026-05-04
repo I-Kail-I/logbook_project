@@ -1,9 +1,18 @@
 import * as DocumentPicker from "expo-document-picker";
 import { useFonts } from "expo-font";
-import { useRouter } from "expo-router";
-import { ArrowLeft, ChevronLeft, ChevronRight, Clock, FileText, Plus, X } from "lucide-react-native";
-import React, { useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
+    ArrowLeft,
+    ChevronLeft,
+    ChevronRight,
+    Clock,
+    FileText,
+    Plus,
+    X,
+} from "lucide-react-native";
+import React, { useEffect, useRef, useState } from "react";
+import {
+    Animated,
     Dimensions,
     Modal,
     ScrollView,
@@ -36,6 +45,25 @@ const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
 export default function LogbookScreen() {
   const router = useRouter();
+  const { openModal } = useLocalSearchParams<{ openModal?: string }>();
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
   const [fontsLoaded] = useFonts({
     "Inter-Bold": require("@/assets/fonts/Inter-Bold.ttf"),
     "Inter-ExtraBold": require("@/assets/fonts/Inter-ExtraBold.ttf"),
@@ -46,6 +74,13 @@ export default function LogbookScreen() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showForm, setShowForm] = useState(false);
+
+  useEffect(() => {
+    if (openModal === "true") {
+      setShowForm(true);
+    }
+  }, [openModal]);
+
   const [formData, setFormData] = useState({
     pilihan: "",
     namaAktivitas: "",
@@ -100,7 +135,9 @@ export default function LogbookScreen() {
         new Date().getDate() === day &&
         new Date().getMonth() === currentDate.getMonth() &&
         new Date().getFullYear() === currentDate.getFullYear();
-      const isSelected = selectedDate.getDate() === day && selectedDate.getMonth() === currentDate.getMonth();
+      const isSelected =
+        selectedDate.getDate() === day &&
+        selectedDate.getMonth() === currentDate.getMonth();
       const hasActivity = day === 1 || day === 2; // Sample data
 
       days.push(
@@ -113,7 +150,9 @@ export default function LogbookScreen() {
             setSelectedDate(newDate);
           }}
         >
-          <Text style={[s.dayText, isSelected && s.dayTextSelected]}>{day}</Text>
+          <Text style={[s.dayText, isSelected && s.dayTextSelected]}>
+            {day}
+          </Text>
           {hasActivity && <View style={s.activityDot} />}
         </TouchableOpacity>,
       );
@@ -124,79 +163,103 @@ export default function LogbookScreen() {
   return (
     <View style={s.root}>
       <StatusBar barStyle="light-content" backgroundColor={C.orange} />
-
-      {/* Header */}
-      <View style={s.header}>
-        <View style={s.headerTop}>
-          <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
-            <ArrowLeft size={24} color={C.white} />
-          </TouchableOpacity>
-        </View>
-        <Text style={s.headerTitle}>Logbook Saya</Text>
-        <Text style={s.headerSubtitle}>Catat Aktifitas</Text>
-      </View>
-
-      {/* Calendar Card */}
-      <View style={s.calendarCard}>
-        {/* Month Navigation */}
-        <View style={s.monthNav}>
-          <TouchableOpacity
-            onPress={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
-          >
-            <ChevronLeft size={24} color={C.textDark} />
-          </TouchableOpacity>
-          <Text style={s.monthText}>{monthYear.charAt(0).toUpperCase() + monthYear.slice(1)}</Text>
-          <TouchableOpacity
-            onPress={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
-          >
-            <ChevronRight size={24} color={C.textDark} />
-          </TouchableOpacity>
+      <Animated.View
+        style={{
+          flex: 1,
+          opacity: fadeAnim,
+          transform: [{ translateY: slideAnim }],
+        }}
+      >
+        {/* Header */}
+        <View style={s.header}>
+          <View style={s.headerTop}>
+            <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
+              <ArrowLeft size={24} color={C.white} />
+            </TouchableOpacity>
+          </View>
+          <Text style={s.headerTitle}>Logbook Saya</Text>
+          <Text style={s.headerSubtitle}>Catat Aktifitas</Text>
         </View>
 
-        {/* Day Headers */}
-        <View style={s.dayHeaders}>
-          {DAYS.map((day) => (
-            <Text key={day} style={s.dayHeaderText}>
-              {day}
+        {/* Calendar Card */}
+        <View style={s.calendarCard}>
+          {/* Month Navigation */}
+          <View style={s.monthNav}>
+            <TouchableOpacity
+              onPress={() =>
+                setCurrentDate(
+                  new Date(
+                    currentDate.getFullYear(),
+                    currentDate.getMonth() - 1,
+                  ),
+                )
+              }
+            >
+              <ChevronLeft size={24} color={C.textDark} />
+            </TouchableOpacity>
+            <Text style={s.monthText}>
+              {monthYear.charAt(0).toUpperCase() + monthYear.slice(1)}
             </Text>
-          ))}
-        </View>
-
-        {/* Calendar Grid */}
-        <View style={s.calendarGrid}>{renderCalendar()}</View>
-      </View>
-
-      {/* Selected Date Activities */}
-      <ScrollView style={s.activitiesSection}>
-        <Text style={s.selectedDateText}>{selectedDateStr}</Text>
-
-        {/* Activity Card */}
-        <View style={s.activityCard}>
-          <View style={s.activityHeader}>
-            <View style={s.activityTimeRow}>
-              <Clock size={14} color={C.textLight} />
-              <Text style={s.activityTime}>8.00 - 09.15</Text>
-            </View>
-            <View style={s.statusBadge}>
-              <Text style={s.statusText}>Selesai</Text>
-            </View>
+            <TouchableOpacity
+              onPress={() =>
+                setCurrentDate(
+                  new Date(
+                    currentDate.getFullYear(),
+                    currentDate.getMonth() + 1,
+                  ),
+                )
+              }
+            >
+              <ChevronRight size={24} color={C.textDark} />
+            </TouchableOpacity>
           </View>
 
-          <View style={s.activityBody}>
-            <View style={s.activityIcon}>
-              <FileText size={20} color={C.white} />
-            </View>
-            <View style={s.activityContent}>
-              <Text style={s.activityTitle}>Dokumen DOKSLI</Text>
-              <Text style={s.activityDesc}>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in euismod augue.
+          {/* Day Headers */}
+          <View style={s.dayHeaders}>
+            {DAYS.map((day) => (
+              <Text key={day} style={s.dayHeaderText}>
+                {day}
               </Text>
-            </View>
+            ))}
           </View>
+
+          {/* Calendar Grid */}
+          <View style={s.calendarGrid}>{renderCalendar()}</View>
         </View>
 
-        <View style={{ height: 120 }} />
-      </ScrollView>
+        {/* Selected Date Activities */}
+        <ScrollView style={s.activitiesSection}>
+          <Text style={s.selectedDateText}>{selectedDateStr}</Text>
+
+          {/* Activity Card */}
+          <View style={s.activityCard}>
+            <View style={s.activityHeader}>
+              <View style={s.activityTimeRow}>
+                <Clock size={14} color={C.textLight} />
+                <Text style={s.activityTime}>8.00 - 09.15</Text>
+              </View>
+              <View style={s.statusBadge}>
+                <Text style={s.statusText}>Selesai</Text>
+              </View>
+            </View>
+
+            <View style={s.activityBody}>
+              <View style={s.activityIcon}>
+                <FileText size={20} color={C.white} />
+              </View>
+              <View style={s.activityContent}>
+                <Text style={s.activityTitle}>Dokumen DOKSLI</Text>
+                <Text style={s.activityDesc}>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam
+                  in euismod augue.
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={{ height: 120 }} />
+        </ScrollView>
+      </Animated.View>
 
       {/* Floating Add Button */}
       <TouchableOpacity style={s.fab} onPress={() => setShowForm(true)}>
@@ -204,7 +267,12 @@ export default function LogbookScreen() {
       </TouchableOpacity>
 
       {/* Add Log Modal */}
-      <Modal visible={showForm} animationType="slide" transparent onRequestClose={() => setShowForm(false)}>
+      <Modal
+        visible={showForm}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowForm(false)}
+      >
         <View style={s.modalOverlay}>
           <View style={s.modalContent}>
             {/* Modal Header */}
@@ -222,7 +290,9 @@ export default function LogbookScreen() {
                 <TextInput
                   style={s.input}
                   value={formData.pilihan}
-                  onChangeText={(text) => setFormData({ ...formData, pilihan: text })}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, pilihan: text })
+                  }
                   placeholder="Pilih kategori"
                 />
               </View>
@@ -233,7 +303,9 @@ export default function LogbookScreen() {
                 <TextInput
                   style={s.input}
                   value={formData.namaAktivitas}
-                  onChangeText={(text) => setFormData({ ...formData, namaAktivitas: text })}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, namaAktivitas: text })
+                  }
                   placeholder="Masukkan nama aktivitas"
                 />
               </View>
@@ -244,7 +316,9 @@ export default function LogbookScreen() {
                 <TextInput
                   style={s.input}
                   value={formData.tanggal}
-                  onChangeText={(text) => setFormData({ ...formData, tanggal: text })}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, tanggal: text })
+                  }
                   placeholder="Pilih tanggal"
                 />
               </View>
@@ -255,7 +329,9 @@ export default function LogbookScreen() {
                 <TextInput
                   style={[s.input, s.inputLarge]}
                   value={formData.deskripsi}
-                  onChangeText={(text) => setFormData({ ...formData, deskripsi: text })}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, deskripsi: text })
+                  }
                   placeholder="Deskripsikan pekerjaan..."
                   multiline
                   numberOfLines={4}
@@ -266,13 +342,15 @@ export default function LogbookScreen() {
               <View style={s.inputCard}>
                 <Text style={s.inputLabel}>Bukti Aktivitas</Text>
                 <TouchableOpacity style={s.fileButton} onPress={pickDocument}>
-                  <Text style={s.fileButtonText}>{formData.bukti?.name || "Choose File"}</Text>
+                  <Text style={s.fileButtonText}>
+                    {formData.bukti?.name || "Choose File"}
+                  </Text>
                 </TouchableOpacity>
               </View>
 
               <Text style={s.fileHint}>
-                silahkan tambahkan bukti aktivitas berupa foto pengerjaan atau dokumen yang di kerjakan, dengan maksimal
-                ukuran 1MB!
+                silahkan tambahkan bukti aktivitas berupa foto pengerjaan atau
+                dokumen yang di kerjakan, dengan maksimal ukuran 1MB!
               </Text>
 
               {/* Action Buttons */}
@@ -293,7 +371,10 @@ export default function LogbookScreen() {
                   <Text style={s.deleteButtonText}>Hapus Log</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={s.saveButton} onPress={() => setShowForm(false)}>
+                <TouchableOpacity
+                  style={s.saveButton}
+                  onPress={() => setShowForm(false)}
+                >
                   <Text style={s.saveButtonText}>Simpan Log Harian</Text>
                 </TouchableOpacity>
               </View>
