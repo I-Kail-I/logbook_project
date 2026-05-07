@@ -640,6 +640,11 @@ const s = StyleSheet.create({
     color: C.textDark,
     fontFamily: "Inter-Bold",
     padding: 0,
+    borderColor: "#0000001A",
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
   },
   inputLarge: {
     height: 80,
