@@ -1,24 +1,10 @@
+import { useSettings } from "@/contexts/SettingsContext";
 import { useFadeInOnFocus } from "@/hooks/useFadeInOnFocus";
 import { useFonts } from "expo-font";
 import { useRouter } from "expo-router";
-import {
-  ArrowLeft,
-  Calendar,
-  Clock,
-  FileText,
-  TrendingUp,
-} from "lucide-react-native";
+import { ArrowLeft, Calendar, Clock, FileText, TrendingUp } from "lucide-react-native";
 import React, { useState } from "react";
-import {
-  Animated,
-  Dimensions,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Animated, Dimensions, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { BarChart, LineChart } from "react-native-gifted-charts";
 
 const { width: W } = Dimensions.get("window");
@@ -34,67 +20,68 @@ const C = {
   cardBg: "#FFFFFF",
 };
 
-const BAR_DATA = [
-  { value: 4, label: "Sen", frontColor: C.orange },
-  { value: 6, label: "Sel", frontColor: C.orange },
-  { value: 3, label: "Rab", frontColor: C.orange },
-  { value: 8, label: "Kam", frontColor: C.orange },
-  { value: 5, label: "Jum", frontColor: C.orange },
-  { value: 2, label: "Sab", frontColor: C.orange },
-  { value: 0, label: "Min", frontColor: C.orange },
-];
-
-const LINE_DATA = [
-  { value: 4, label: "Sen" },
-  { value: 6, label: "Sel" },
-  { value: 3, label: "Rab" },
-  { value: 8, label: "Kam" },
-  { value: 5, label: "Jum" },
-  { value: 2, label: "Sab" },
-  { value: 0, label: "Min" },
-];
-
-const STAT_CARDS = [
-  {
-    icon: FileText,
-    value: "156",
-    label: "Total Logbook",
-    bg: "#FFF4E5",
-    iconColor: C.orange,
-  },
-  {
-    icon: Calendar,
-    value: "28",
-    label: "Bulan Ini",
-    bg: "#F3E8FF",
-    iconColor: "#8B5CF6",
-  },
-  {
-    icon: TrendingUp,
-    value: "4.2",
-    label: "Rata-rata/Hari",
-    bg: "#DCFCE7",
-    iconColor: "#22C55E",
-  },
-  {
-    icon: Clock,
-    value: "312",
-    label: "Total Jam",
-    bg: "#E0E7FF",
-    iconColor: "#6366F1",
-  },
-];
-
 export default function StatistikScreen() {
   const router = useRouter();
-  const [range, setRange] = useState<"minggu" | "bulan">("minggu");
+  const [range, setRange] = useState<"week" | "month">("week");
   const { fadeAnim, slideAnim } = useFadeInOnFocus(400);
+  const { t } = useSettings();
   useFonts({
     "Inter-Bold": require("@/assets/fonts/Inter-Bold.ttf"),
     "Inter-ExtraBold": require("@/assets/fonts/Inter-ExtraBold.ttf"),
     "ABeeZee-Regular": require("@/assets/fonts/ABeeZee-Regular.ttf"),
     "Magra-Regular": require("@/assets/fonts/Magra-Regular.ttf"),
   });
+
+  const BAR_DATA = [
+    { value: 4, label: t("mon"), frontColor: C.orange },
+    { value: 6, label: t("tue"), frontColor: C.orange },
+    { value: 3, label: t("wed"), frontColor: C.orange },
+    { value: 8, label: t("thu"), frontColor: C.orange },
+    { value: 5, label: t("fri"), frontColor: C.orange },
+    { value: 2, label: t("sat"), frontColor: C.orange },
+    { value: 0, label: t("sun"), frontColor: C.orange },
+  ];
+
+  const LINE_DATA = [
+    { value: 4, label: t("mon") },
+    { value: 6, label: t("tue") },
+    { value: 3, label: t("wed") },
+    { value: 8, label: t("thu") },
+    { value: 5, label: t("fri") },
+    { value: 2, label: t("sat") },
+    { value: 0, label: t("sun") },
+  ];
+
+  const STAT_CARDS = [
+    {
+      icon: FileText,
+      value: "156",
+      label: t("total_logbook"),
+      bg: "#FFF4E5",
+      iconColor: C.orange,
+    },
+    {
+      icon: Calendar,
+      value: "28",
+      label: t("this_month"),
+      bg: "#F3E8FF",
+      iconColor: "#8B5CF6",
+    },
+    {
+      icon: TrendingUp,
+      value: "4.2",
+      label: t("avg_per_day"),
+      bg: "#DCFCE7",
+      iconColor: "#22C55E",
+    },
+    {
+      icon: Clock,
+      value: "312",
+      label: t("total_hours"),
+      bg: "#E0E7FF",
+      iconColor: "#6366F1",
+    },
+  ];
 
   return (
     <View style={s.root}>
@@ -112,10 +99,8 @@ export default function StatistikScreen() {
             <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
               <ArrowLeft size={24} color={C.white} />
             </TouchableOpacity>
-            <Text style={s.headerTitle}>Statistik</Text>
-            <Text style={s.headerSubtitle}>
-              Analisis aktivitas logbook Anda
-            </Text>
+            <Text style={s.headerTitle}>{t("stats_title")}</Text>
+            <Text style={s.headerSubtitle}>{t("stats_sub")}</Text>
           </View>
 
           {/* Stats Grid */}
@@ -134,33 +119,19 @@ export default function StatistikScreen() {
           {/* Bar Chart */}
           <View style={[s.chartCard, { overflow: "hidden" }]}>
             <View style={s.chartHeader}>
-              <Text style={s.chartTitle}>Grafik Aktivitas</Text>
+              <Text style={s.chartTitle}>{t("activity_chart")}</Text>
               <View style={s.toggleRow}>
                 <TouchableOpacity
-                  onPress={() => setRange("minggu")}
-                  style={[s.toggleBtn, range === "minggu" && s.toggleActive]}
+                  onPress={() => setRange("week")}
+                  style={[s.toggleBtn, range === "week" && s.toggleActive]}
                 >
-                  <Text
-                    style={[
-                      s.toggleText,
-                      range === "minggu" && s.toggleTextActive,
-                    ]}
-                  >
-                    Minggu
-                  </Text>
+                  <Text style={[s.toggleText, range === "week" && s.toggleTextActive]}>{t("week")}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  onPress={() => setRange("bulan")}
-                  style={[s.toggleBtn, range === "bulan" && s.toggleActive]}
+                  onPress={() => setRange("month")}
+                  style={[s.toggleBtn, range === "month" && s.toggleActive]}
                 >
-                  <Text
-                    style={[
-                      s.toggleText,
-                      range === "bulan" && s.toggleTextActive,
-                    ]}
-                  >
-                    Bulan
-                  </Text>
+                  <Text style={[s.toggleText, range === "month" && s.toggleTextActive]}>{t("month")}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -187,7 +158,7 @@ export default function StatistikScreen() {
 
           {/* Line Chart */}
           <View style={[s.chartCard, { overflow: "hidden" }]}>
-            <Text style={s.chartTitle}>Tren Produktivitas</Text>
+            <Text style={s.chartTitle}>{t("productivity_trend")}</Text>
             <View style={{ marginLeft: -10, marginRight: -10 }}>
               <LineChart
                 data={LINE_DATA}

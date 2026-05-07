@@ -1,24 +1,10 @@
+import { useSettings } from "@/contexts/SettingsContext";
 import { useFadeInOnFocus } from "@/hooks/useFadeInOnFocus";
 import { useFonts } from "expo-font";
 import { useRouter } from "expo-router";
-import {
-    ArrowLeft,
-    Bell,
-    FileText,
-    ShieldAlert,
-    Trash2,
-} from "lucide-react-native";
+import { ArrowLeft, Bell, FileText, ShieldAlert, Trash2 } from "lucide-react-native";
 import React from "react";
-import {
-    Animated,
-    Dimensions,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native";
+import { Animated, Dimensions, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const { width: W } = Dimensions.get("window");
 const C = {
@@ -34,58 +20,59 @@ const C = {
   red: "#EF4444",
 };
 
-const NOTIFICATIONS = [
-  {
-    id: 1,
-    title: "Pengingat Logbook",
-    message: "Jangan lupa untuk mengisi logbook hari ini sebelum jam 17:00",
-    time: "5 menit lalu",
-    icon: Bell,
-    iconBg: "#FFF4E5",
-    iconColor: C.orange,
-    unread: true,
-  },
-  {
-    id: 2,
-    title: "Logbook Berhasil Disimpan",
-    message: "Logbook tanggal 2 Februari 2026 telah berhasil disimpan",
-    time: "1 jam lalu",
-    icon: FileText,
-    iconBg: "#EEF2FF",
-    iconColor: "#7C3AED",
-    unread: true,
-  },
-  {
-    id: 3,
-    title: "Deadline Laporan",
-    message: "Laporan bulanan harus diserahkan dalam 3 hari",
-    time: "2 jam lalu",
-    icon: ShieldAlert,
-    iconBg: "#FEE2E2",
-    iconColor: C.red,
-    unread: false,
-  },
-  {
-    id: 4,
-    title: "Pembaruan Sistem",
-    message: "Sistem akan melakukan maintenance pada tanggal 5 Februari 2026",
-    time: "1 hari lalu",
-    icon: FileText,
-    iconBg: "#E8EAF6",
-    iconColor: "#4338CA",
-    unread: false,
-  },
-];
-
 export default function NotificationsScreen() {
   const router = useRouter();
   const { fadeAnim, slideAnim } = useFadeInOnFocus(400);
+  const { t } = useSettings();
   useFonts({
     "Inter-Bold": require("@/assets/fonts/Inter-Bold.ttf"),
     "Inter-ExtraBold": require("@/assets/fonts/Inter-ExtraBold.ttf"),
     "ABeeZee-Regular": require("@/assets/fonts/ABeeZee-Regular.ttf"),
     "Magra-Regular": require("@/assets/fonts/Magra-Regular.ttf"),
   });
+
+  const NOTIFICATIONS = [
+    {
+      id: 1,
+      title: t("reminder_logbook"),
+      message: t("reminder_logbook_msg"),
+      time: `5 ${t("minutes_ago")}`,
+      icon: Bell,
+      iconBg: "#FFF4E5",
+      iconColor: C.orange,
+      unread: true,
+    },
+    {
+      id: 2,
+      title: t("logbook_saved"),
+      message: t("logbook_saved_msg"),
+      time: `1 ${t("hours_ago")}`,
+      icon: FileText,
+      iconBg: "#EEF2FF",
+      iconColor: "#7C3AED",
+      unread: true,
+    },
+    {
+      id: 3,
+      title: t("report_deadline"),
+      message: t("report_deadline_msg"),
+      time: `2 ${t("hours_ago")}`,
+      icon: ShieldAlert,
+      iconBg: "#FEE2E2",
+      iconColor: C.red,
+      unread: false,
+    },
+    {
+      id: 4,
+      title: t("system_update"),
+      message: t("system_update_msg"),
+      time: `1 ${t("days_ago")}`,
+      icon: FileText,
+      iconBg: "#E8EAF6",
+      iconColor: "#4338CA",
+      unread: false,
+    },
+  ];
 
   const unreadCount = NOTIFICATIONS.filter((item) => item.unread).length;
 
@@ -104,17 +91,15 @@ export default function NotificationsScreen() {
             <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
               <ArrowLeft size={24} color={C.white} />
             </TouchableOpacity>
-            <Text style={s.headerTitle}>Notifikasi</Text>
+            <Text style={s.headerTitle}>{t("notifications_title")}</Text>
             <View style={s.headerSpacer} />
           </View>
-          <Text style={s.headerSubtitle}>{unreadCount} belum dibaca</Text>
+          <Text style={s.headerSubtitle}>
+            {unreadCount} {t("unread")}
+          </Text>
         </View>
 
-        <ScrollView
-          style={s.content}
-          contentContainerStyle={s.contentContainer}
-          showsVerticalScrollIndicator={false}
-        >
+        <ScrollView style={s.content} contentContainerStyle={s.contentContainer} showsVerticalScrollIndicator={false}>
           {NOTIFICATIONS.map((item) => {
             const Icon = item.icon;
             return (
@@ -157,31 +142,28 @@ const s = StyleSheet.create({
     borderBottomRightRadius: 24,
   },
   headerTop: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: "column",
     marginTop: 20,
   },
-  backBtn: {
+  backBtn: {    
     width: 44,
     height: 44,
-    borderRadius: 12,
+    borderRadius: 100,
     backgroundColor: "rgba(255,255,255,0.2)",
     justifyContent: "center",
     alignItems: "center",
   },
   headerTitle: {
-    flex: 1,
-    marginLeft: 16,
+    marginTop: 9,
     color: C.white,
-    fontSize: 20,
+    fontSize: 25,
     fontFamily: "Inter-Bold",
   },
   headerSpacer: {
     width: 44,
   },
   headerSubtitle: {
-    marginTop: 12,
+    marginTop: 5,
     color: "rgba(255,255,255,0.87)",
     fontSize: 14,
     fontFamily: "ABeeZee-Regular",

@@ -1,22 +1,23 @@
+import { useSettings } from "@/contexts/SettingsContext";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  Animated,
-  Dimensions,
-  Easing,
-  Image,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
+    ActivityIndicator,
+    Animated,
+    Dimensions,
+    Easing,
+    Image,
+    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    View,
 } from "react-native";
 
 //  Screen Dimensions
@@ -70,6 +71,7 @@ const LOGO_Y_FINAL = H * 0.065;
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { t } = useSettings();
 
   const [nip, setNip] = useState("");
   const [password, setPassword] = useState("");
@@ -202,7 +204,7 @@ export default function LoginScreen() {
               showsVerticalScrollIndicator={false}
             >
               {/* Form Title */}
-              <Animated.Text style={[s.loginTitle, { opacity: formOp }]}>Login</Animated.Text>
+              <Animated.Text style={[s.loginTitle, { opacity: formOp }]}>{t("login")}</Animated.Text>
 
               {/* NIP Field */}
               <Animated.View style={[s.fieldWrap, { opacity: formOp }]}>
@@ -212,7 +214,7 @@ export default function LoginScreen() {
                     style={s.textInput}
                     value={nip}
                     onChangeText={setNip}
-                    placeholder="Masukkan NIP Anda"
+                    placeholder={t("enter_nip")}
                     placeholderTextColor={C.inputPlaceholder}
                     keyboardType="numeric"
                     autoCapitalize="none"
@@ -231,7 +233,7 @@ export default function LoginScreen() {
                     style={[s.textInput, { flex: 1 }]}
                     value={password}
                     onChangeText={setPassword}
-                    placeholder="Masukkan Password"
+                    placeholder={t("enter_password")}
                     placeholderTextColor={C.inputPlaceholder}
                     secureTextEntry={secureText}
                     autoCapitalize="none"
@@ -244,7 +246,7 @@ export default function LoginScreen() {
                     style={s.showHideBtn}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   >
-                    <Text style={s.showHideText}>{secureText ? "Lihat" : "Sembunyikan"}</Text>
+                    <Text style={s.showHideText}>{secureText ? t("show") : t("hide")}</Text>
                   </TouchableOpacity>
                 </View>
               </Animated.View>
@@ -260,7 +262,7 @@ export default function LoginScreen() {
                   {loading ? (
                     <ActivityIndicator color={C.loginBtnText} size="small" />
                   ) : (
-                    <Text style={s.btnText}>Login</Text>
+                    <Text style={s.btnText}>{t("login")}</Text>
                   )}
                 </TouchableOpacity>
               </Animated.View>

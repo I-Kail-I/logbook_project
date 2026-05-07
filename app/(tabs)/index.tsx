@@ -1,26 +1,10 @@
+import { useSettings } from "@/contexts/SettingsContext";
 import { useFadeInOnFocus } from "@/hooks/useFadeInOnFocus";
 import { useFonts } from "expo-font";
 import { useRouter } from "expo-router";
-import {
-  BarChart3,
-  Bell,
-  Calendar,
-  Clock,
-  FileText,
-  Plus,
-  Printer,
-} from "lucide-react-native";
+import { BarChart3, Bell, Calendar, Clock, FileText, Plus, Printer } from "lucide-react-native";
 import React from "react";
-import {
-  Animated,
-  Dimensions,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Animated, Dimensions, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const { width: W, height: H } = Dimensions.get("window");
 
@@ -42,7 +26,7 @@ const ACTIVITIES = [
   {
     id: 1,
     time: "8.00 - 09.15",
-    status: "Selesai",
+    statusKey: "completed" as const,
     title: "Dokumen DOKSLI Asli",
     desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in euismod augue.",
     iconColor: C.orange,
@@ -50,7 +34,7 @@ const ACTIVITIES = [
   {
     id: 2,
     time: "8.00 - 09.15",
-    status: "Selesai",
+    statusKey: "completed" as const,
     title: "Dokumen DOKSLI Asli",
     desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in euismod augue.",
     iconColor: C.orange,
@@ -60,6 +44,7 @@ const ACTIVITIES = [
 export default function DashboardScreen() {
   const router = useRouter();
   const { fadeAnim, slideAnim } = useFadeInOnFocus(400);
+  const { t, settings } = useSettings();
 
   const [fontsLoaded] = useFonts({
     "Inter-Bold": require("@/assets/fonts/Inter-Bold.ttf"),
@@ -69,7 +54,8 @@ export default function DashboardScreen() {
     "Magra-Bold": require("@/assets/fonts/Magra-Bold.ttf"),
   });
 
-  const today = new Date().toLocaleDateString("id-ID", {
+  const locale = settings.language === "id" ? "id-ID" : "en-US";
+  const today = new Date().toLocaleDateString(locale, {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -81,9 +67,7 @@ export default function DashboardScreen() {
       <StatusBar barStyle="light-content" backgroundColor={C.orange} />
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Animated.View
-          style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}
-        >
+        <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
           {/* Header Section */}
           <View style={s.header}>
             {/* Date & Notification */}
@@ -92,10 +76,7 @@ export default function DashboardScreen() {
                 <Calendar size={18} color={C.white} />
                 <Text style={s.dateText}>{today}</Text>
               </View>
-              <TouchableOpacity
-                style={s.bellBtn}
-                onPress={() => router.push("/(tabs)/notifications")}
-              >
+              <TouchableOpacity style={s.bellBtn} onPress={() => router.push("/(tabs)/notifications")}>
                 <Bell size={20} color={C.white} />
                 <View style={s.bellBadge} />
               </TouchableOpacity>
@@ -109,7 +90,7 @@ export default function DashboardScreen() {
                 </View>
               </View>
               <View style={s.greeting}>
-                <Text style={s.greetingText}>Selamat Pagi</Text>
+                <Text style={s.greetingText}>{t("greeting_morning")}</Text>
                 <Text style={s.userName}>RAJAMUDA ASDI</Text>
               </View>
             </View>
@@ -125,27 +106,22 @@ export default function DashboardScreen() {
                   })
                 }
               >
-                <View
-                  style={[s.actionIcon, { backgroundColor: C.orangeLight }]}
-                >
+                <View style={[s.actionIcon, { backgroundColor: C.orangeLight }]}>
                   <Plus size={24} color={C.orangeDark} />
                 </View>
                 <View>
-                  <Text style={s.actionTitle}>Tambah Log</Text>
-                  <Text style={s.actionSubtitle}>Catat aktivitas</Text>
+                  <Text style={s.actionTitle}>{t("add_log")}</Text>
+                  <Text style={s.actionSubtitle}>{t("add_log_sub")}</Text>
                 </View>
               </TouchableOpacity>
 
-              <TouchableOpacity
-                style={s.actionCard}
-                onPress={() => router.push("/(tabs)/statistik")}
-              >
+              <TouchableOpacity style={s.actionCard} onPress={() => router.push("/(tabs)/statistik")}>
                 <View style={[s.actionIcon, { backgroundColor: "#E8D5F7" }]}>
                   <BarChart3 size={24} color="#8B5CF6" />
                 </View>
                 <View>
-                  <Text style={s.actionTitle}>Statistika</Text>
-                  <Text style={s.actionSubtitle}>Lihat Laporan</Text>
+                  <Text style={s.actionTitle}>{t("statistics")}</Text>
+                  <Text style={s.actionSubtitle}>{t("statistics_sub")}</Text>
                 </View>
               </TouchableOpacity>
             </View>
@@ -157,7 +133,7 @@ export default function DashboardScreen() {
             <View style={s.sectionHeader}>
               <View style={s.sectionTitleRow}>
                 <FileText size={20} color={C.orange} />
-                <Text style={s.sectionTitle}>Aktivitas Hari ini</Text>
+                <Text style={s.sectionTitle}>{t("today_activity")}</Text>
               </View>
               <TouchableOpacity>
                 <Printer size={20} color={C.textGray} />
@@ -174,17 +150,12 @@ export default function DashboardScreen() {
                     <Text style={s.activityTime}>{item.time}</Text>
                   </View>
                   <View style={s.statusBadge}>
-                    <Text style={s.statusText}>{item.status}</Text>
+                    <Text style={s.statusText}>{t(item.statusKey)}</Text>
                   </View>
                 </View>
 
                 <View style={s.activityBody}>
-                  <View
-                    style={[
-                      s.activityIcon,
-                      { backgroundColor: item.iconColor },
-                    ]}
-                  >
+                  <View style={[s.activityIcon, { backgroundColor: item.iconColor }]}>
                     <FileText size={20} color={C.white} />
                   </View>
                   <View style={s.activityContent}>
