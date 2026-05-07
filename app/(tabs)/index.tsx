@@ -1,24 +1,25 @@
+import { useFadeInOnFocus } from "@/hooks/useFadeInOnFocus";
 import { useFonts } from "expo-font";
 import { useRouter } from "expo-router";
 import {
-    BarChart3,
-    Bell,
-    Calendar,
-    Clock,
-    FileText,
-    Plus,
-    Printer,
+  BarChart3,
+  Bell,
+  Calendar,
+  Clock,
+  FileText,
+  Plus,
+  Printer,
 } from "lucide-react-native";
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import {
-    Animated,
-    Dimensions,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Animated,
+  Dimensions,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const { width: W, height: H } = Dimensions.get("window");
@@ -58,23 +59,7 @@ const ACTIVITIES = [
 
 export default function DashboardScreen() {
   const router = useRouter();
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(30)).current;
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 400,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 400,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, []);
+  const { fadeAnim, slideAnim } = useFadeInOnFocus(400);
 
   const [fontsLoaded] = useFonts({
     "Inter-Bold": require("@/assets/fonts/Inter-Bold.ttf"),
@@ -107,7 +92,10 @@ export default function DashboardScreen() {
                 <Calendar size={18} color={C.white} />
                 <Text style={s.dateText}>{today}</Text>
               </View>
-              <TouchableOpacity style={s.bellBtn}>
+              <TouchableOpacity
+                style={s.bellBtn}
+                onPress={() => router.push("/(tabs)/notifications")}
+              >
                 <Bell size={20} color={C.white} />
                 <View style={s.bellBadge} />
               </TouchableOpacity>

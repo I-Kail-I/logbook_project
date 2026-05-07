@@ -1,3 +1,4 @@
+import { useFadeInOnFocus } from "@/hooks/useFadeInOnFocus";
 import { useFonts } from "expo-font";
 import { useRouter } from "expo-router";
 import {
@@ -9,6 +10,7 @@ import {
 } from "lucide-react-native";
 import React, { useState } from "react";
 import {
+  Animated,
   Dimensions,
   ScrollView,
   StatusBar,
@@ -86,6 +88,7 @@ const STAT_CARDS = [
 export default function StatistikScreen() {
   const router = useRouter();
   const [range, setRange] = useState<"minggu" | "bulan">("minggu");
+  const { fadeAnim, slideAnim } = useFadeInOnFocus(400);
   useFonts({
     "Inter-Bold": require("@/assets/fonts/Inter-Bold.ttf"),
     "Inter-ExtraBold": require("@/assets/fonts/Inter-ExtraBold.ttf"),
@@ -96,111 +99,121 @@ export default function StatistikScreen() {
   return (
     <View style={s.root}>
       <StatusBar barStyle="light-content" backgroundColor={C.orange} />
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={s.header}>
-          <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
-            <ArrowLeft size={24} color={C.white} />
-          </TouchableOpacity>
-          <Text style={s.headerTitle}>Statistik</Text>
-          <Text style={s.headerSubtitle}>Analisis aktivitas logbook Anda</Text>
-        </View>
+      <Animated.View
+        style={{
+          flex: 1,
+          opacity: fadeAnim,
+          transform: [{ translateY: slideAnim }],
+        }}
+      >
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {/* Header */}
+          <View style={s.header}>
+            <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
+              <ArrowLeft size={24} color={C.white} />
+            </TouchableOpacity>
+            <Text style={s.headerTitle}>Statistik</Text>
+            <Text style={s.headerSubtitle}>
+              Analisis aktivitas logbook Anda
+            </Text>
+          </View>
 
-        {/* Stats Grid */}
-        <View style={s.statsGrid}>
-          {STAT_CARDS.map((item, i) => (
-            <View key={i} style={s.statCard}>
-              <View style={[s.statIconWrap, { backgroundColor: item.bg }]}>
-                <item.icon size={20} color={item.iconColor} />
+          {/* Stats Grid */}
+          <View style={s.statsGrid}>
+            {STAT_CARDS.map((item, i) => (
+              <View key={i} style={s.statCard}>
+                <View style={[s.statIconWrap, { backgroundColor: item.bg }]}>
+                  <item.icon size={20} color={item.iconColor} />
+                </View>
+                <Text style={s.statValue}>{item.value}</Text>
+                <Text style={s.statLabel}>{item.label}</Text>
               </View>
-              <Text style={s.statValue}>{item.value}</Text>
-              <Text style={s.statLabel}>{item.label}</Text>
-            </View>
-          ))}
-        </View>
+            ))}
+          </View>
 
-        {/* Bar Chart */}
-        <View style={[s.chartCard, { overflow: "hidden" }]}>
-          <View style={s.chartHeader}>
-            <Text style={s.chartTitle}>Grafik Aktivitas</Text>
-            <View style={s.toggleRow}>
-              <TouchableOpacity
-                onPress={() => setRange("minggu")}
-                style={[s.toggleBtn, range === "minggu" && s.toggleActive]}
-              >
-                <Text
-                  style={[
-                    s.toggleText,
-                    range === "minggu" && s.toggleTextActive,
-                  ]}
+          {/* Bar Chart */}
+          <View style={[s.chartCard, { overflow: "hidden" }]}>
+            <View style={s.chartHeader}>
+              <Text style={s.chartTitle}>Grafik Aktivitas</Text>
+              <View style={s.toggleRow}>
+                <TouchableOpacity
+                  onPress={() => setRange("minggu")}
+                  style={[s.toggleBtn, range === "minggu" && s.toggleActive]}
                 >
-                  Minggu
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setRange("bulan")}
-                style={[s.toggleBtn, range === "bulan" && s.toggleActive]}
-              >
-                <Text
-                  style={[
-                    s.toggleText,
-                    range === "bulan" && s.toggleTextActive,
-                  ]}
+                  <Text
+                    style={[
+                      s.toggleText,
+                      range === "minggu" && s.toggleTextActive,
+                    ]}
+                  >
+                    Minggu
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setRange("bulan")}
+                  style={[s.toggleBtn, range === "bulan" && s.toggleActive]}
                 >
-                  Bulan
-                </Text>
-              </TouchableOpacity>
+                  <Text
+                    style={[
+                      s.toggleText,
+                      range === "bulan" && s.toggleTextActive,
+                    ]}
+                  >
+                    Bulan
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View style={{ marginLeft: -10, marginRight: -10 }}>
+              <BarChart
+                data={BAR_DATA}
+                barWidth={W * 0.07}
+                spacing={W * 0.03}
+                height={160}
+                maxValue={8}
+                noOfSections={4}
+                yAxisThickness={0}
+                xAxisThickness={1}
+                xAxisColor={C.textLight}
+                yAxisTextStyle={s.axisText}
+                xAxisLabelTextStyle={s.axisText}
+                rulesType="dashed"
+                rulesColor="#E0E0E0"
+                showYAxisIndices={false}
+                isAnimated
+              />
             </View>
           </View>
-          <View style={{ marginLeft: -10, marginRight: -10 }}>
-            <BarChart
-              data={BAR_DATA}
-              barWidth={W * 0.07}
-              spacing={W * 0.03}
-              height={160}
-              maxValue={8}
-              noOfSections={4}
-              yAxisThickness={0}
-              xAxisThickness={1}
-              xAxisColor={C.textLight}
-              yAxisTextStyle={s.axisText}
-              xAxisLabelTextStyle={s.axisText}
-              rulesType="dashed"
-              rulesColor="#E0E0E0"
-              showYAxisIndices={false}
-              isAnimated
-            />
-          </View>
-        </View>
 
-        {/* Line Chart */}
-        <View style={[s.chartCard, { overflow: "hidden" }]}>
-          <Text style={s.chartTitle}>Tren Produktivitas</Text>
-          <View style={{ marginLeft: -10, marginRight: -10 }}>
-            <LineChart
-              data={LINE_DATA}
-              height={160}
-              maxValue={8}
-              noOfSections={4}
-              color={C.orange}
-              dataPointsColor={C.orange}
-              dataPointsRadius={4}
-              thickness={2}
-              yAxisThickness={0}
-              xAxisThickness={1}
-              xAxisColor={C.textLight}
-              yAxisTextStyle={s.axisText}
-              xAxisLabelTextStyle={s.axisText}
-              rulesType="dashed"
-              rulesColor="#E0E0E0"
-              showYAxisIndices={false}
-              isAnimated
-            />
+          {/* Line Chart */}
+          <View style={[s.chartCard, { overflow: "hidden" }]}>
+            <Text style={s.chartTitle}>Tren Produktivitas</Text>
+            <View style={{ marginLeft: -10, marginRight: -10 }}>
+              <LineChart
+                data={LINE_DATA}
+                height={160}
+                maxValue={8}
+                noOfSections={4}
+                color={C.orange}
+                dataPointsColor={C.orange}
+                dataPointsRadius={4}
+                thickness={2}
+                yAxisThickness={0}
+                xAxisThickness={1}
+                xAxisColor={C.textLight}
+                yAxisTextStyle={s.axisText}
+                xAxisLabelTextStyle={s.axisText}
+                rulesType="dashed"
+                rulesColor="#E0E0E0"
+                showYAxisIndices={false}
+                isAnimated
+              />
+            </View>
           </View>
-        </View>
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
+          <View style={{ height: 100 }} />
+        </ScrollView>
+      </Animated.View>
     </View>
   );
 }

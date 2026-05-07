@@ -1,3 +1,4 @@
+import { useFadeInOnFocus } from "@/hooks/useFadeInOnFocus";
 import * as DocumentPicker from "expo-document-picker";
 import { useFonts } from "expo-font";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -10,7 +11,7 @@ import {
     Plus,
     X,
 } from "lucide-react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Animated,
     Dimensions,
@@ -46,23 +47,7 @@ const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 export default function LogbookScreen() {
   const router = useRouter();
   const { openModal } = useLocalSearchParams<{ openModal?: string }>();
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(30)).current;
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 400,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 400,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, []);
+  const { fadeAnim, slideAnim } = useFadeInOnFocus(400);
 
   const [fontsLoaded] = useFonts({
     "Inter-Bold": require("@/assets/fonts/Inter-Bold.ttf"),
