@@ -1,9 +1,12 @@
+import { useSettings } from "@/contexts/SettingsContext";
 import { useFadeInOnFocus } from "@/hooks/useFadeInOnFocus";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useFonts } from "expo-font";
 import { useRouter } from "expo-router";
 import {
   ArrowLeft,
   Bell,
+  Check,
   ChevronRight,
   Globe,
   HelpCircle,
@@ -45,6 +48,8 @@ const C = {
 export default function SettingsScreen() {
   const router = useRouter();
   const { fadeAnim, slideAnim } = useFadeInOnFocus(400);
+  const { settings, toggleNotifications, setLanguage, t } = useSettings();
+  usePushNotifications();
   const [fontsLoaded] = useFonts({
     "Inter-Bold": require("@/assets/fonts/Inter-Bold.ttf"),
     "Inter-ExtraBold": require("@/assets/fonts/Inter-ExtraBold.ttf"),
@@ -54,7 +59,7 @@ export default function SettingsScreen() {
 
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [notifications, setNotifications] = useState(false);
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
 
   const [profileData, setProfileData] = useState({
     nama: "",
@@ -82,11 +87,7 @@ export default function SettingsScreen() {
     onPress?: () => void;
     rightElement?: React.ReactNode;
   }) => (
-    <TouchableOpacity
-      style={s.settingItem}
-      onPress={onPress}
-      disabled={!onPress}
-    >
+    <TouchableOpacity style={s.settingItem} onPress={onPress} disabled={!onPress}>
       <View style={s.settingIcon}>
         <Icon size={20} color={C.orange} />
       </View>
@@ -115,29 +116,27 @@ export default function SettingsScreen() {
               <ArrowLeft size={24} color={C.white} />
             </TouchableOpacity>
           </View>
-          <Text style={s.headerTitle}>Pengaturan</Text>
-          <Text style={s.headerSubtitle}>
-            Kelola akun dan preferensi aplikasi
-          </Text>
+          <Text style={s.headerTitle}>{t("settings")}</Text>
+          <Text style={s.headerSubtitle}>{t("settings_sub")}</Text>
         </View>
 
         {/* Content */}
         <ScrollView style={s.content} showsVerticalScrollIndicator={false}>
           {/* Akun Section */}
           <View style={s.section}>
-            <Text style={s.sectionTitle}>Akun</Text>
+            <Text style={s.sectionTitle}>{t("account")}</Text>
             <View style={s.card}>
               <SettingItem
                 icon={User}
-                title="Ubah Profil"
-                subtitle="Nama, email, dan informasi akun"
+                title={t("edit_profile")}
+                subtitle={t("edit_profile_sub")}
                 onPress={() => setShowProfileModal(true)}
               />
               <View style={s.divider} />
               <SettingItem
                 icon={Lock}
-                title="Ubah Password"
-                subtitle="Perbarui password akun Anda"
+                title={t("change_password")}
+                subtitle={t("change_password_sub")}
                 onPress={() => setShowPasswordModal(true)}
               />
             </View>
@@ -145,48 +144,45 @@ export default function SettingsScreen() {
 
           {/* Aplikasi Section */}
           <View style={s.section}>
-            <Text style={s.sectionTitle}>Aplikasi</Text>
+            <Text style={s.sectionTitle}>{t("application")}</Text>
             <View style={s.card}>
               <SettingItem
                 icon={Bell}
-                title="Notifikasi"
-                subtitle="Pengaturan Pemberitahuan"
+                title={t("notifications")}
+                subtitle={t("notifications_sub")}
                 rightElement={
                   <Switch
-                    value={notifications}
-                    onValueChange={setNotifications}
+                    value={settings.notificationsEnabled}
+                    onValueChange={toggleNotifications}
                     trackColor={{ false: "#E0E0E0", true: C.orangeLight }}
-                    thumbColor={notifications ? C.orange : "#fff"}
+                    thumbColor={settings.notificationsEnabled ? C.orange : "#fff"}
                   />
                 }
               />
               <View style={s.divider} />
-              <SettingItem icon={Globe} title="Bahasa" subtitle="Indonesia" />
-              <View style={s.divider} />
               <SettingItem
-                icon={Palette}
-                title="Tampilan"
-                subtitle="Sesuaikan tema aplikasi"
+                icon={Globe}
+                title={t("language")}
+                subtitle={settings.language === "id" ? t("indonesia") : t("english")}
+                onPress={() => setShowLanguageModal(true)}
               />
+              <View style={s.divider} />
+              <SettingItem icon={Palette} title={t("display")} subtitle={t("display_sub")} />
             </View>
           </View>
 
           {/* Lainnya Section */}
           <View style={s.section}>
-            <Text style={s.sectionTitle}>Lainnya</Text>
+            <Text style={s.sectionTitle}>{t("other")}</Text>
             <View style={s.card}>
-              <SettingItem
-                icon={HelpCircle}
-                title="Bantuan"
-                subtitle="Pusat bantuan dan FAQ"
-              />
+              <SettingItem icon={HelpCircle} title={t("help")} subtitle={t("help_sub")} />
             </View>
           </View>
 
           {/* Logout Button */}
           <TouchableOpacity style={s.logoutButton}>
             <LogOut size={18} color={C.red} />
-            <Text style={s.logoutText}>Keluar dari Akun</Text>
+            <Text style={s.logoutText}>{t("logout")}</Text>
           </TouchableOpacity>
 
           <View style={{ height: 100 }} />
@@ -203,7 +199,7 @@ export default function SettingsScreen() {
         <View style={s.modalOverlay}>
           <View style={s.modalContent}>
             <View style={s.modalHeader}>
-              <Text style={s.modalTitle}>Ubah Profil</Text>
+              <Text style={s.modalTitle}>{t("edit_profile")}</Text>
               <TouchableOpacity onPress={() => setShowProfileModal(false)}>
                 <X size={24} color={C.textGray} />
               </TouchableOpacity>
@@ -211,65 +207,54 @@ export default function SettingsScreen() {
 
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={s.inputGroup}>
-                <Text style={s.inputLabel}>Nama Lengkap</Text>
+                <Text style={s.inputLabel}>{t("full_name")}</Text>
                 <TextInput
                   style={s.input}
                   value={profileData.nama}
-                  onChangeText={(text) =>
-                    setProfileData({ ...profileData, nama: text })
-                  }
-                  placeholder="Contoh Nama: Jamaluddin"
+                  onChangeText={(text) => setProfileData({ ...profileData, nama: text })}
+                  placeholder={t("full_name_placeholder")}
                   placeholderTextColor={C.textLight}
                 />
               </View>
 
               <View style={s.inputGroup}>
-                <Text style={s.inputLabel}>Email</Text>
+                <Text style={s.inputLabel}>{t("email")}</Text>
                 <TextInput
                   style={s.input}
                   value={profileData.email}
-                  onChangeText={(text) =>
-                    setProfileData({ ...profileData, email: text })
-                  }
-                  placeholder="Contoh Email: logbook@gmail.com"
+                  onChangeText={(text) => setProfileData({ ...profileData, email: text })}
+                  placeholder={t("email_placeholder")}
                   placeholderTextColor={C.textLight}
                   keyboardType="email-address"
                 />
               </View>
 
               <View style={s.inputGroup}>
-                <Text style={s.inputLabel}>NIP</Text>
+                <Text style={s.inputLabel}>{t("nip")}</Text>
                 <TextInput
                   style={s.input}
                   value={profileData.nip}
-                  onChangeText={(text) =>
-                    setProfileData({ ...profileData, nip: text })
-                  }
-                  placeholder="0123456789"
+                  onChangeText={(text) => setProfileData({ ...profileData, nip: text })}
+                  placeholder={t("nip_placeholder")}
                   placeholderTextColor={C.textLight}
                   keyboardType="number-pad"
                 />
               </View>
 
               <View style={s.inputGroup}>
-                <Text style={s.inputLabel}>No Telepon</Text>
+                <Text style={s.inputLabel}>{t("phone")}</Text>
                 <TextInput
                   style={s.input}
                   value={profileData.telepon}
-                  onChangeText={(text) =>
-                    setProfileData({ ...profileData, telepon: text })
-                  }
-                  placeholder="081********"
+                  onChangeText={(text) => setProfileData({ ...profileData, telepon: text })}
+                  placeholder={t("phone_placeholder")}
                   placeholderTextColor={C.textLight}
                   keyboardType="phone-pad"
                 />
               </View>
 
-              <TouchableOpacity
-                style={s.saveButton}
-                onPress={() => setShowProfileModal(false)}
-              >
-                <Text style={s.saveButtonText}>Simpan</Text>
+              <TouchableOpacity style={s.saveButton} onPress={() => setShowProfileModal(false)}>
+                <Text style={s.saveButtonText}>{t("save")}</Text>
               </TouchableOpacity>
 
               <View style={{ height: 40 }} />
@@ -288,7 +273,7 @@ export default function SettingsScreen() {
         <View style={s.modalOverlay}>
           <View style={s.modalContent}>
             <View style={s.modalHeader}>
-              <Text style={s.modalTitle}>Ubah Password</Text>
+              <Text style={s.modalTitle}>{t("change_password")}</Text>
               <TouchableOpacity onPress={() => setShowPasswordModal(false)}>
                 <X size={24} color={C.textGray} />
               </TouchableOpacity>
@@ -296,56 +281,90 @@ export default function SettingsScreen() {
 
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={s.inputGroup}>
-                <Text style={s.inputLabel}>Password Saat Ini</Text>
+                <Text style={s.inputLabel}>{t("current_password")}</Text>
                 <TextInput
                   style={s.input}
                   value={passwordData.current}
-                  onChangeText={(text) =>
-                    setPasswordData({ ...passwordData, current: text })
-                  }
-                  placeholder="Password123"
+                  onChangeText={(text) => setPasswordData({ ...passwordData, current: text })}
+                  placeholder={t("current_password_placeholder")}
                   placeholderTextColor={C.textLight}
                   secureTextEntry
                 />
               </View>
 
               <View style={s.inputGroup}>
-                <Text style={s.inputLabel}>Password Baru</Text>
+                <Text style={s.inputLabel}>{t("new_password")}</Text>
                 <TextInput
                   style={s.input}
                   value={passwordData.new}
-                  onChangeText={(text) =>
-                    setPasswordData({ ...passwordData, new: text })
-                  }
-                  placeholder="Password baru"
+                  onChangeText={(text) => setPasswordData({ ...passwordData, new: text })}
+                  placeholder={t("new_password_placeholder")}
                   placeholderTextColor={C.textLight}
                   secureTextEntry
                 />
               </View>
 
               <View style={s.inputGroup}>
-                <Text style={s.inputLabel}>Konfirmasi Password Baru</Text>
+                <Text style={s.inputLabel}>{t("confirm_password")}</Text>
                 <TextInput
                   style={s.input}
                   value={passwordData.confirm}
-                  onChangeText={(text) =>
-                    setPasswordData({ ...passwordData, confirm: text })
-                  }
-                  placeholder="Masukkan password baru"
+                  onChangeText={(text) => setPasswordData({ ...passwordData, confirm: text })}
+                  placeholder={t("confirm_password_placeholder")}
                   placeholderTextColor={C.textLight}
                   secureTextEntry
                 />
               </View>
 
-              <TouchableOpacity
-                style={s.saveButton}
-                onPress={() => setShowPasswordModal(false)}
-              >
-                <Text style={s.saveButtonText}>Simpan</Text>
+              <TouchableOpacity style={s.saveButton} onPress={() => setShowPasswordModal(false)}>
+                <Text style={s.saveButtonText}>{t("save")}</Text>
               </TouchableOpacity>
 
               <View style={{ height: 40 }} />
             </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Language Modal */}
+      <Modal
+        visible={showLanguageModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowLanguageModal(false)}
+      >
+        <View style={s.modalOverlay}>
+          <View style={s.modalContent}>
+            <View style={s.modalHeader}>
+              <Text style={s.modalTitle}>{t("choose_language")}</Text>
+              <TouchableOpacity onPress={() => setShowLanguageModal(false)}>
+                <X size={24} color={C.textGray} />
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              style={[s.languageItem, settings.language === "id" && s.languageItemActive]}
+              onPress={() => {
+                setLanguage("id");
+                setShowLanguageModal(false);
+              }}
+            >
+              <Text style={[s.languageText, settings.language === "id" && s.languageTextActive]}>{t("indonesia")}</Text>
+              {settings.language === "id" && <Check size={20} color={C.orange} />}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[s.languageItem, settings.language === "en" && s.languageItemActive]}
+              onPress={() => {
+                setLanguage("en");
+                setShowLanguageModal(false);
+              }}
+            >
+              <Text style={[s.languageText, settings.language === "en" && s.languageTextActive]}>{t("english")}</Text>
+              {settings.language === "en" && <Check size={20} color={C.orange} />}
+            </TouchableOpacity>
+
+            <View style={{ height: 40 }} />
           </View>
         </View>
       </Modal>
@@ -531,5 +550,31 @@ const s = StyleSheet.create({
     fontSize: 14,
     fontFamily: "Inter-Bold",
     color: C.white,
+  },
+
+  // Language Item
+  languageItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    marginBottom: 8,
+    backgroundColor: C.cardBg,
+    borderWidth: 1,
+    borderColor: C.border,
+  },
+  languageItemActive: {
+    backgroundColor: "rgba(245, 166, 35, 0.08)",
+    borderColor: C.orange,
+  },
+  languageText: {
+    fontSize: 14,
+    fontFamily: "Inter-Bold",
+    color: C.textDark,
+  },
+  languageTextActive: {
+    color: C.orange,
   },
 });
