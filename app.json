@@ -48,7 +48,9 @@
             "./assets/fonts/Magra-Bold.ttf"
           ]
         }
-      ]
+      ],
+      "expo-localization",
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true,
