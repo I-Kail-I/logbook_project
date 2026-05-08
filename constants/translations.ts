@@ -79,6 +79,21 @@ export const translations = {
     dark: "Gelap",
     light: "Terang",
 
+    // Activity Details & Print
+    activity_details: "Detail Aktivitas",
+    time: "Waktu",
+    status: "Status",
+    category: "Kategori",
+    activity: "Aktivitas",
+    description: "Deskripsi",
+    evidence: "Bukti",
+    print_log: "Cetak Log Ini",
+    print_preview: "Preview Cetak",
+    share_pdf: "Bagikan PDF",
+    print: "Cetak",
+    in_progress_status: "Dalam Proses",
+    pending_status: "Menunggu",
+
     // Notifications
     notifications_title: "Notifikasi",
     unread: "belum dibaca",
@@ -203,6 +218,21 @@ export const translations = {
     dark_mode: "Dark Mode",
     dark: "Dark",
     light: "Light",
+
+    // Activity Details & Print
+    activity_details: "Activity Details",
+    time: "Time",
+    status: "Status",
+    category: "Category",
+    activity: "Activity",
+    description: "Description",
+    evidence: "Evidence",
+    print_log: "Print This Log",
+    print_preview: "Print Preview",
+    share_pdf: "Share PDF",
+    print: "Print",
+    in_progress_status: "In Progress",
+    pending_status: "Pending",
 
     // Notifications
     notifications_title: "Notifications",
