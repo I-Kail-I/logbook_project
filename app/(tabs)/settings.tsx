@@ -1,3 +1,4 @@
+import { getThemeColors } from "@/constants/theme";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useFadeInOnFocus } from "@/hooks/useFadeInOnFocus";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
@@ -12,7 +13,7 @@ import {
   HelpCircle,
   Lock,
   LogOut,
-  Palette,
+  Moon,
   User,
   X,
 } from "lucide-react-native";
@@ -30,26 +31,14 @@ import {
   View,
 } from "react-native";
 
-const C = {
-  orange: "#F5A623",
-  orangeDark: "#E08A0E",
-  orangeLight: "#FFB84D",
-  white: "#FFFFFF",
-  textDark: "#1A1A1A",
-  textGray: "#666666",
-  textLight: "#999999",
-  bgGray: "#F5F5F5",
-  cardBg: "#FFFFFF",
-  red: "#FF4444",
-  redLight: "#FFE5E5",
-  border: "#E0E0E0",
-};
-
 export default function SettingsScreen() {
   const router = useRouter();
   const { fadeAnim, slideAnim } = useFadeInOnFocus(400);
-  const { settings, toggleNotifications, setLanguage, t } = useSettings();
+  const { settings, toggleNotifications, toggleTheme, setLanguage, t } = useSettings();
   usePushNotifications();
+  const isDark = settings.theme === "dark";
+  const C = getThemeColors(isDark);
+  const s = getStyles(C);
   const [fontsLoaded] = useFonts({
     "Inter-Bold": require("@/assets/fonts/Inter-Bold.ttf"),
     "Inter-ExtraBold": require("@/assets/fonts/Inter-ExtraBold.ttf"),
@@ -89,19 +78,19 @@ export default function SettingsScreen() {
   }) => (
     <TouchableOpacity style={s.settingItem} onPress={onPress} disabled={!onPress}>
       <View style={s.settingIcon}>
-        <Icon size={20} color={C.orange} />
+        <Icon size={20} color="#F5A623" />
       </View>
       <View style={s.settingText}>
         <Text style={s.settingTitle}>{title}</Text>
         <Text style={s.settingSubtitle}>{subtitle}</Text>
       </View>
-      {rightElement || <ChevronRight size={20} color={C.textLight} />}
+      {rightElement || <ChevronRight size={20} color={isDark ? "#808080" : "#999999"} />}
     </TouchableOpacity>
   );
 
   return (
     <View style={s.root}>
-      <StatusBar barStyle="light-content" backgroundColor={C.orange} />
+      <StatusBar barStyle={isDark ? "light-content" : "light-content"} backgroundColor={C.orange} />
       <Animated.View
         style={{
           flex: 1,
@@ -154,8 +143,22 @@ export default function SettingsScreen() {
                   <Switch
                     value={settings.notificationsEnabled}
                     onValueChange={toggleNotifications}
-                    trackColor={{ false: "#E0E0E0", true: C.orangeLight }}
-                    thumbColor={settings.notificationsEnabled ? C.orange : "#fff"}
+                    trackColor={{ false: "#E0E0E0", true: "#FFB84D" }}
+                    thumbColor={settings.notificationsEnabled ? "#F5A623" : "#fff"}
+                  />
+                }
+              />
+              <View style={s.divider} />
+              <SettingItem
+                icon={Moon}
+                title={t("dark_mode")}
+                subtitle={settings.theme === "dark" ? t("dark") : t("light")}
+                rightElement={
+                  <Switch
+                    value={settings.theme === "dark"}
+                    onValueChange={toggleTheme}
+                    trackColor={{ false: "#E0E0E0", true: "#FFB84D" }}
+                    thumbColor={settings.theme === "dark" ? "#F5A623" : "#fff"}
                   />
                 }
               />
@@ -166,8 +169,6 @@ export default function SettingsScreen() {
                 subtitle={settings.language === "id" ? t("indonesia") : t("english")}
                 onPress={() => setShowLanguageModal(true)}
               />
-              <View style={s.divider} />
-              <SettingItem icon={Palette} title={t("display")} subtitle={t("display_sub")} />
             </View>
           </View>
 
@@ -372,209 +373,210 @@ export default function SettingsScreen() {
   );
 }
 
-const s = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: C.bgGray,
-  },
+const getStyles = (C: ReturnType<typeof getThemeColors>) =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: C.bgGray,
+    },
 
-  // Header
-  header: {
-    backgroundColor: C.orange,
-    paddingTop: 50,
-    paddingHorizontal: 20,
-    paddingBottom: 30,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-  },
-  headerTop: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontFamily: "Inter-ExtraBold",
-    color: C.white,
-    marginBottom: 4,
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    fontFamily: "Magra-Regular",
-    color: C.white,
-    opacity: 0.9,
-  },
+    // Header
+    header: {
+      backgroundColor: C.orange,
+      paddingTop: 50,
+      paddingHorizontal: 20,
+      paddingBottom: 30,
+      borderBottomLeftRadius: 30,
+      borderBottomRightRadius: 30,
+    },
+    headerTop: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 10,
+    },
+    backBtn: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: "rgba(255,255,255,0.2)",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    headerTitle: {
+      fontSize: 24,
+      fontFamily: "Inter-ExtraBold",
+      color: C.white,
+      marginBottom: 4,
+    },
+    headerSubtitle: {
+      fontSize: 14,
+      fontFamily: "Magra-Regular",
+      color: C.white,
+      opacity: 0.9,
+    },
 
-  // Content
-  content: {
-    paddingHorizontal: 16,
-    paddingTop: 20,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontFamily: "Inter-Bold",
-    color: C.textGray,
-    marginBottom: 12,
-    marginLeft: 4,
-  },
-  card: {
-    backgroundColor: C.cardBg,
-    borderRadius: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
+    // Content
+    content: {
+      paddingHorizontal: 16,
+      paddingTop: 20,
+    },
+    section: {
+      marginBottom: 24,
+    },
+    sectionTitle: {
+      fontSize: 14,
+      fontFamily: "Inter-Bold",
+      color: C.textGray,
+      marginBottom: 12,
+      marginLeft: 4,
+    },
+    card: {
+      backgroundColor: C.cardBg,
+      borderRadius: 16,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
+    },
 
-  // Setting Item
-  settingItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
-  },
-  settingIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: "rgba(245, 166, 35, 0.1)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  settingText: {
-    flex: 1,
-  },
-  settingTitle: {
-    fontSize: 14,
-    fontFamily: "Inter-Bold",
-    color: C.textDark,
-    marginBottom: 2,
-  },
-  settingSubtitle: {
-    fontSize: 12,
-    color: C.textLight,
-    fontFamily: "Magra-Regular",
-  },
-  divider: {
-    height: 1,
-    backgroundColor: "#F0F0F0",
-    marginLeft: 64,
-  },
+    // Setting Item
+    settingItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      padding: 16,
+    },
+    settingIcon: {
+      width: 36,
+      height: 36,
+      borderRadius: 10,
+      backgroundColor: "rgba(245, 166, 35, 0.1)",
+      justifyContent: "center",
+      alignItems: "center",
+      marginRight: 12,
+    },
+    settingText: {
+      flex: 1,
+    },
+    settingTitle: {
+      fontSize: 14,
+      fontFamily: "Inter-Bold",
+      color: C.textDark,
+      marginBottom: 2,
+    },
+    settingSubtitle: {
+      fontSize: 12,
+      color: C.textLight,
+      fontFamily: "Magra-Regular",
+    },
+    divider: {
+      height: 1,
+      backgroundColor: C.divider,
+      marginLeft: 64,
+    },
 
-  // Logout Button
-  logoutButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: C.redLight,
-    paddingVertical: 14,
-    borderRadius: 25,
-    gap: 8,
-  },
-  logoutText: {
-    fontSize: 14,
-    fontFamily: "Inter-Bold",
-    color: C.red,
-  },
+    // Logout Button
+    logoutButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: C.redLight,
+      paddingVertical: 14,
+      borderRadius: 25,
+      gap: 8,
+    },
+    logoutText: {
+      fontSize: 14,
+      fontFamily: "Inter-Bold",
+      color: C.red,
+    },
 
-  // Modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "flex-end",
-  },
-  modalContent: {
-    backgroundColor: C.cardBg,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    maxHeight: "85%",
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontFamily: "Inter-Bold",
-    color: C.textDark,
-  },
+    // Modal
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.5)",
+      justifyContent: "flex-end",
+    },
+    modalContent: {
+      backgroundColor: C.cardBg,
+      borderTopLeftRadius: 30,
+      borderTopRightRadius: 30,
+      paddingHorizontal: 20,
+      paddingTop: 20,
+      maxHeight: "85%",
+    },
+    modalHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 24,
+    },
+    modalTitle: {
+      fontSize: 18,
+      fontFamily: "Inter-Bold",
+      color: C.textDark,
+    },
 
-  // Form Inputs
-  inputGroup: {
-    marginBottom: 16,
-  },
-  inputLabel: {
-    fontSize: 12,
-    fontFamily: "Magra-Regular",
-    color: C.textDark,
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: "#F8F8F8",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 14,
-    color: C.textDark,
-    fontFamily: "Inter-Bold",
-    borderWidth: 1,
-    borderColor: C.border,
-  },
+    // Form Inputs
+    inputGroup: {
+      marginBottom: 16,
+    },
+    inputLabel: {
+      fontSize: 12,
+      fontFamily: "Magra-Regular",
+      color: C.textDark,
+      marginBottom: 8,
+    },
+    input: {
+      backgroundColor: C.inputBg,
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      fontSize: 14,
+      color: C.textDark,
+      fontFamily: "Inter-Bold",
+      borderWidth: 1,
+      borderColor: C.border,
+    },
 
-  // Save Button
-  saveButton: {
-    backgroundColor: C.orange,
-    paddingVertical: 14,
-    borderRadius: 25,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 8,
-  },
-  saveButtonText: {
-    fontSize: 14,
-    fontFamily: "Inter-Bold",
-    color: C.white,
-  },
+    // Save Button
+    saveButton: {
+      backgroundColor: C.orange,
+      paddingVertical: 14,
+      borderRadius: 25,
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 8,
+    },
+    saveButtonText: {
+      fontSize: 14,
+      fontFamily: "Inter-Bold",
+      color: C.white,
+    },
 
-  // Language Item
-  languageItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 16,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    marginBottom: 8,
-    backgroundColor: C.cardBg,
-    borderWidth: 1,
-    borderColor: C.border,
-  },
-  languageItemActive: {
-    backgroundColor: "rgba(245, 166, 35, 0.08)",
-    borderColor: C.orange,
-  },
-  languageText: {
-    fontSize: 14,
-    fontFamily: "Inter-Bold",
-    color: C.textDark,
-  },
-  languageTextActive: {
-    color: C.orange,
-  },
-});
+    // Language Item
+    languageItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingVertical: 16,
+      paddingHorizontal: 12,
+      borderRadius: 12,
+      marginBottom: 8,
+      backgroundColor: C.cardBg,
+      borderWidth: 1,
+      borderColor: C.border,
+    },
+    languageItemActive: {
+      backgroundColor: "rgba(245, 166, 35, 0.08)",
+      borderColor: C.orange,
+    },
+    languageText: {
+      fontSize: 14,
+      fontFamily: "Inter-Bold",
+      color: C.textDark,
+    },
+    languageTextActive: {
+      color: C.orange,
+    },
+  });

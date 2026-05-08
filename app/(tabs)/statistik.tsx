@@ -1,3 +1,4 @@
+import { getThemeColors } from "@/constants/theme";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useFadeInOnFocus } from "@/hooks/useFadeInOnFocus";
 import { useFonts } from "expo-font";
@@ -8,23 +9,15 @@ import { Animated, Dimensions, ScrollView, StatusBar, StyleSheet, Text, Touchabl
 import { BarChart, LineChart } from "react-native-gifted-charts";
 
 const { width: W } = Dimensions.get("window");
-const C = {
-  orange: "#F5A623",
-  orangeDark: "#E08A0E",
-  orangeLight: "#FFB84D",
-  white: "#FFFFFF",
-  textDark: "#1A1A1A",
-  textGray: "#666666",
-  textLight: "#999999",
-  bgGray: "#F5F5F5",
-  cardBg: "#FFFFFF",
-};
 
 export default function StatistikScreen() {
   const router = useRouter();
   const [range, setRange] = useState<"week" | "month">("week");
   const { fadeAnim, slideAnim } = useFadeInOnFocus(400);
-  const { t } = useSettings();
+  const { t, settings } = useSettings();
+  const isDark = settings.theme === "dark";
+  const C = getThemeColors(isDark);
+  const s = getStyles(C, W);
   useFonts({
     "Inter-Bold": require("@/assets/fonts/Inter-Bold.ttf"),
     "Inter-ExtraBold": require("@/assets/fonts/Inter-ExtraBold.ttf"),
@@ -189,95 +182,96 @@ export default function StatistikScreen() {
   );
 }
 
-const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: C.bgGray },
-  header: {
-    backgroundColor: C.orange,
-    paddingTop: 50,
-    paddingHorizontal: 20,
-    paddingBottom: 25,
-    borderBottomLeftRadius: 25,
-    borderBottomRightRadius: 25,
-  },
-  backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  headerTitle: { fontSize: 24, fontFamily: "Inter-ExtraBold", color: C.white },
-  headerSubtitle: {
-    fontSize: 13,
-    fontFamily: "Magra-Regular",
-    color: C.white,
-    opacity: 0.9,
-    marginTop: 2,
-  },
-  statsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    paddingHorizontal: 16,
-    gap: 12,
-    marginTop: 16,
-    justifyContent: "space-between",
-  },
-  statCard: {
-    backgroundColor: C.cardBg,
-    borderRadius: 16,
-    padding: 14,
-    width: (W - 56) / 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  statIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  statValue: { fontSize: 22, fontFamily: "Inter-ExtraBold", color: C.textDark },
-  statLabel: {
-    fontSize: 11,
-    fontFamily: "Magra-Regular",
-    color: C.textGray,
-    marginTop: 2,
-  },
-  chartCard: {
-    backgroundColor: C.cardBg,
-    marginHorizontal: 16,
-    marginTop: 16,
-    borderRadius: 20,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  chartHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  chartTitle: { fontSize: 16, fontFamily: "Inter-Bold", color: C.textDark },
-  toggleRow: {
-    flexDirection: "row",
-    backgroundColor: "#F0F0F0",
-    borderRadius: 20,
-    padding: 2,
-  },
-  toggleBtn: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 18 },
-  toggleActive: { backgroundColor: C.orange },
-  toggleText: { fontSize: 12, fontFamily: "Inter-Bold", color: C.textGray },
-  toggleTextActive: { color: C.white },
-  axisText: { fontSize: 10, color: C.textLight, fontFamily: "Magra-Regular" },
-});
+const getStyles = (C: ReturnType<typeof getThemeColors>, W: number) =>
+  StyleSheet.create({
+    root: { flex: 1, backgroundColor: C.bgGray },
+    header: {
+      backgroundColor: C.orange,
+      paddingTop: 50,
+      paddingHorizontal: 20,
+      paddingBottom: 25,
+      borderBottomLeftRadius: 25,
+      borderBottomRightRadius: 25,
+    },
+    backBtn: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: "rgba(255,255,255,0.2)",
+      justifyContent: "center",
+      alignItems: "center",
+      marginBottom: 12,
+    },
+    headerTitle: { fontSize: 24, fontFamily: "Inter-ExtraBold", color: C.white },
+    headerSubtitle: {
+      fontSize: 13,
+      fontFamily: "Magra-Regular",
+      color: C.white,
+      opacity: 0.9,
+      marginTop: 2,
+    },
+    statsGrid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      paddingHorizontal: 16,
+      gap: 12,
+      marginTop: 16,
+      justifyContent: "space-between",
+    },
+    statCard: {
+      backgroundColor: C.cardBg,
+      borderRadius: 16,
+      padding: 14,
+      width: (W - 56) / 2,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    statIconWrap: {
+      width: 36,
+      height: 36,
+      borderRadius: 10,
+      justifyContent: "center",
+      alignItems: "center",
+      marginBottom: 10,
+    },
+    statValue: { fontSize: 22, fontFamily: "Inter-ExtraBold", color: C.textDark },
+    statLabel: {
+      fontSize: 11,
+      fontFamily: "Magra-Regular",
+      color: C.textGray,
+      marginTop: 2,
+    },
+    chartCard: {
+      backgroundColor: C.cardBg,
+      marginHorizontal: 16,
+      marginTop: 16,
+      borderRadius: 20,
+      padding: 16,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    chartHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 10,
+    },
+    chartTitle: { fontSize: 16, fontFamily: "Inter-Bold", color: C.textDark },
+    toggleRow: {
+      flexDirection: "row",
+      backgroundColor: "#F0F0F0",
+      borderRadius: 20,
+      padding: 2,
+    },
+    toggleBtn: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 18 },
+    toggleActive: { backgroundColor: C.orange },
+    toggleText: { fontSize: 12, fontFamily: "Inter-Bold", color: C.textGray },
+    toggleTextActive: { color: C.white },
+    axisText: { fontSize: 10, color: C.textLight, fontFamily: "Magra-Regular" },
+  });

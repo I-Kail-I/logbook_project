@@ -75,6 +75,9 @@ export const translations = {
     new_password_placeholder: "Password baru",
     confirm_password: "Konfirmasi Password Baru",
     confirm_password_placeholder: "Masukkan password baru",
+    dark_mode: "Mode Gelap",
+    dark: "Gelap",
+    light: "Terang",
 
     // Notifications
     notifications_title: "Notifikasi",
@@ -197,6 +200,9 @@ export const translations = {
     new_password_placeholder: "New password",
     confirm_password: "Confirm New Password",
     confirm_password_placeholder: "Enter new password",
+    dark_mode: "Dark Mode",
+    dark: "Dark",
+    light: "Light",
 
     // Notifications
     notifications_title: "Notifications",

@@ -1,3 +1,4 @@
+import { getThemeColors } from "@/constants/theme";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useFadeInOnFocus } from "@/hooks/useFadeInOnFocus";
 import * as DocumentPicker from "expo-document-picker";
@@ -6,34 +7,19 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeft, ChevronLeft, ChevronRight, Clock, FileText, Plus, X } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
-  Animated,
-  Dimensions,
-  Modal,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Animated,
+    Dimensions,
+    Modal,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const { width: W } = Dimensions.get("window");
-
-const C = {
-  orange: "#F5A623",
-  orangeDark: "#E08A0E",
-  orangeLight: "#FFB84D",
-  white: "#FFFFFF",
-  textDark: "#1A1A1A",
-  textGray: "#666666",
-  textLight: "#999999",
-  green: "#4CAF50",
-  greenLight: "#E8F5E9",
-  bgGray: "#F5F5F5",
-  cardBg: "#FFFFFF",
-  red: "#FF4444",
-};
 
 const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
@@ -42,6 +28,9 @@ export default function LogbookScreen() {
   const { openModal } = useLocalSearchParams<{ openModal?: string }>();
   const { fadeAnim, slideAnim } = useFadeInOnFocus(400);
   const { t, settings } = useSettings();
+  const isDark = settings.theme === "dark";
+  const C = getThemeColors(isDark);
+  const s = getStyles(C);
 
   const [fontsLoaded] = useFonts({
     "Inter-Bold": require("@/assets/fonts/Inter-Bold.ttf"),
@@ -326,335 +315,332 @@ export default function LogbookScreen() {
   );
 }
 
-const s = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: C.bgGray,
-  },
+const getStyles = (C: ReturnType<typeof getThemeColors>) =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: C.bgGray,
+    },
 
-  // Header
-  header: {
-    backgroundColor: C.orange,
-    paddingTop: 50,
-    paddingHorizontal: 20,
-    paddingBottom: 25,
-    borderBottomLeftRadius: 25,
-    borderBottomRightRadius: 25,
-  },
-  headerTop: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontFamily: "Inter-ExtraBold",
-    color: C.white,
-    marginBottom: 4,
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    fontFamily: "Magra-Regular",
-    color: C.white,
-    opacity: 0.9,
-  },
+    // Header
+    header: {
+      backgroundColor: C.orange,
+      paddingTop: 50,
+      paddingHorizontal: 20,
+      paddingBottom: 25,
+      borderBottomLeftRadius: 25,
+      borderBottomRightRadius: 25,
+    },
+    headerTop: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 10,
+    },
+    backBtn: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: "rgba(255,255,255,0.2)",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    headerTitle: {
+      fontSize: 24,
+      fontFamily: "Inter-ExtraBold",
+      color: C.white,
+      marginBottom: 4,
+    },
+    headerSubtitle: {
+      fontSize: 14,
+      fontFamily: "Magra-Regular",
+      color: C.white,
+      opacity: 0.9,
+    },
 
-  // Calendar Card
-  calendarCard: {
-    backgroundColor: C.cardBg,
-    marginHorizontal: 16,
-    marginTop: -15,
-    borderRadius: 20,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  monthNav: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  monthText: {
-    fontSize: 16,
-    fontFamily: "Inter-Bold",
-    color: C.textDark,
-    textTransform: "capitalize",
-  },
-  dayHeaders: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginBottom: 10,
-  },
-  dayHeaderText: {
-    fontSize: 12,
-    color: C.textLight,
-    fontFamily: "Magra-Regular",
-    width: 36,
-    textAlign: "center",
-  },
-  calendarGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-  },
-  dayCell: {
-    width: 36,
-    height: 36,
-    justifyContent: "center",
-    alignItems: "center",
-    margin: 2,
-  },
-  daySelected: {
-    backgroundColor: C.orange,
-    borderRadius: 18,
-  },
-  dayText: {
-    fontSize: 13,
-    color: C.textDark,
-    fontFamily: "Inter-Bold",
-  },
-  dayTextSelected: {
-    color: C.white,
-  },
-  activityDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: C.orange,
-    marginTop: 2,
-  },
+    // Calendar Card
+    calendarCard: {
+      backgroundColor: C.cardBg,
+      marginHorizontal: 16,
+      marginTop: -15,
+      borderRadius: 20,
+      padding: 20,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 4,
+    },
+    monthNav: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 20,
+    },
+    monthText: {
+      fontSize: 16,
+      fontFamily: "Inter-Bold",
+      color: C.textDark,
+      textTransform: "capitalize",
+    },
+    dayHeaders: {
+      flexDirection: "row",
+      justifyContent: "space-around",
+      marginBottom: 10,
+    },
+    dayHeaderText: {
+      fontSize: 12,
+      color: C.textLight,
+      fontFamily: "Magra-Regular",
+      width: 36,
+      textAlign: "center",
+    },
+    calendarGrid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+    },
+    dayCell: {
+      width: 36,
+      height: 36,
+      justifyContent: "center",
+      alignItems: "center",
+      margin: 2,
+    },
+    daySelected: {
+      backgroundColor: C.orange,
+      borderRadius: 18,
+    },
+    dayText: {
+      fontSize: 13,
+      color: C.textDark,
+      fontFamily: "Inter-Bold",
+    },
+    dayTextSelected: {
+      color: C.white,
+    },
+    activityDot: {
+      width: 4,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: C.orange,
+      marginTop: 2,
+    },
 
-  // Activities Section
-  activitiesSection: {
-    paddingHorizontal: 16,
-    paddingTop: 20,
-  },
-  selectedDateText: {
-    fontSize: 14,
-    fontFamily: "Inter-Bold",
-    color: C.textDark,
-    marginBottom: 16,
-  },
+    // Activities Section
+    activitiesSection: {
+      paddingHorizontal: 16,
+      paddingTop: 20,
+    },
+    selectedDateText: {
+      fontSize: 14,
+      fontFamily: "Inter-Bold",
+      color: C.textDark,
+      marginBottom: 16,
+    },
 
-  // Activity Card
-  activityCard: {
-    backgroundColor: C.cardBg,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  activityHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  activityTimeRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  activityTime: {
-    fontSize: 12,
-    color: C.textLight,
-    fontFamily: "Magra-Regular",
-  },
-  statusBadge: {
-    backgroundColor: C.greenLight,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  statusText: {
-    fontSize: 11,
-    color: C.green,
-    fontFamily: "Inter-Bold",
-  },
-  activityBody: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  activityIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: C.orange,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  activityContent: {
-    flex: 1,
-  },
-  activityTitle: {
-    fontSize: 14,
-    fontFamily: "Inter-Bold",
-    color: C.textDark,
-    marginBottom: 4,
-  },
-  activityDesc: {
-    fontSize: 12,
-    color: C.textGray,
-    lineHeight: 18,
-    fontFamily: "Magra-Regular",
-  },
+    // Activity Card
+    activityCard: {
+      backgroundColor: C.cardBg,
+      borderRadius: 16,
+      padding: 16,
+      marginBottom: 12,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    activityHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 12,
+    },
+    activityTimeRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+    },
+    activityTime: {
+      fontSize: 12,
+      color: C.textLight,
+      fontFamily: "Magra-Regular",
+    },
+    statusBadge: {
+      backgroundColor: C.greenLight,
+      paddingHorizontal: 12,
+      paddingVertical: 4,
+      borderRadius: 12,
+    },
+    statusText: {
+      fontSize: 11,
+      color: C.green,
+      fontFamily: "Inter-Bold",
+    },
+    activityBody: {
+      flexDirection: "row",
+      gap: 12,
+    },
+    activityIcon: {
+      width: 44,
+      height: 44,
+      borderRadius: 12,
+      backgroundColor: C.orange,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    activityContent: {
+      flex: 1,
+    },
+    activityTitle: {
+      fontSize: 14,
+      fontFamily: "Inter-Bold",
+      color: C.textDark,
+      marginBottom: 4,
+    },
+    activityDesc: {
+      fontSize: 12,
+      color: C.textGray,
+      lineHeight: 18,
+      fontFamily: "Magra-Regular",
+    },
 
-  // FAB
-  fab: {
-    position: "absolute",
-    right: 20,
-    bottom: 40,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: C.orange,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
+    // FAB
+    fab: {
+      position: "absolute",
+      right: 20,
+      bottom: 40,
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: C.orange,
+      justifyContent: "center",
+      alignItems: "center",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 8,
+    },
 
-  // Modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "flex-end",
-  },
-  modalContent: {
-    backgroundColor: C.cardBg,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    maxHeight: "90%",
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontFamily: "Inter-Bold",
-    color: C.textDark,
-  },
+    // Modal
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.5)",
+      justifyContent: "flex-end",
+    },
+    modalContent: {
+      backgroundColor: C.cardBg,
+      borderTopLeftRadius: 30,
+      borderTopRightRadius: 30,
+      paddingHorizontal: 20,
+      paddingTop: 20,
+      maxHeight: "90%",
+    },
+    modalHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 20,
+    },
+    modalTitle: {
+      fontSize: 20,
+      fontFamily: "Inter-Bold",
+      color: C.textDark,
+    },
 
-  // Form Inputs
-  inputCard: {
-    backgroundColor: C.cardBg,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  inputCardLarge: {
-    backgroundColor: C.cardBg,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-    minHeight: 120,
-  },
-  inputLabel: {
-    fontSize: 12,
-    color: C.textLight,
-    fontFamily: "Magra-Regular",
-    marginBottom: 8,
-  },
-  input: {
-    fontSize: 14,
-    color: C.textDark,
-    fontFamily: "Inter-Bold",
-    padding: 0,
-    borderColor: "#0000001A",
-    borderWidth: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  inputLarge: {
-    height: 80,
-    textAlignVertical: "top",
-  },
-  fileButton: {
-    backgroundColor: "#E8E8E8",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-    alignSelf: "flex-start",
-  },
-  fileButtonText: {
-    fontSize: 12,
-    color: C.textDark,
-    fontFamily: "Magra-Regular",
-  },
-  fileHint: {
-    fontSize: 11,
-    color: C.textLight,
-    fontFamily: "Magra-Regular",
-    marginTop: 4,
-    marginBottom: 20,
-    lineHeight: 16,
-  },
+    // Form Inputs
+    inputCard: {
+      backgroundColor: C.cardBg,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: C.border,
+    },
+    inputCardLarge: {
+      backgroundColor: C.cardBg,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: C.border,
+      minHeight: 120,
+    },
+    inputLabel: {
+      fontSize: 12,
+      color: C.textLight,
+      fontFamily: "Magra-Regular",
+      marginBottom: 8,
+    },
+    input: {
+      fontSize: 14,
+      color: C.textDark,
+      fontFamily: "Inter-Bold",
+      backgroundColor: C.inputBg,
+      borderColor: C.border,
+      borderWidth: 1,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      borderRadius: 8,
+    },
+    inputLarge: {
+      height: 80,
+      textAlignVertical: "top",
+    },
+    fileButton: {
+      backgroundColor: C.inputBg,
+      borderColor: C.border,
+      borderWidth: 1,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: 8,
+      alignSelf: "flex-start",
+    },
+    fileButtonText: {
+      fontSize: 12,
+      color: C.textDark,
+      fontFamily: "Magra-Regular",
+    },
+    fileHint: {
+      fontSize: 11,
+      color: C.textLight,
+      fontFamily: "Magra-Regular",
+      marginTop: 4,
+      marginBottom: 20,
+      lineHeight: 16,
+    },
 
-  // Modal Actions
-  modalActions: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 10,
-  },
-  deleteButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 25,
-    borderWidth: 1.5,
-    borderColor: C.red,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  deleteButtonText: {
-    fontSize: 14,
-    fontFamily: "Inter-Bold",
-    color: C.red,
-  },
-  saveButton: {
-    flex: 1.5,
-    paddingVertical: 14,
-    borderRadius: 25,
-    backgroundColor: C.orange,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  saveButtonText: {
-    fontSize: 14,
-    fontFamily: "Inter-Bold",
-    color: C.white,
-  },
-});
+    // Modal Actions
+    modalActions: {
+      flexDirection: "row",
+      gap: 12,
+      marginTop: 10,
+    },
+    deleteButton: {
+      flex: 1,
+      paddingVertical: 14,
+      borderRadius: 25,
+      borderWidth: 1.5,
+      borderColor: C.red,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    deleteButtonText: {
+      fontSize: 14,
+      fontFamily: "Inter-Bold",
+      color: C.red,
+    },
+    saveButton: {
+      flex: 1.5,
+      paddingVertical: 14,
+      borderRadius: 25,
+      backgroundColor: C.orange,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    saveButtonText: {
+      fontSize: 14,
+      fontFamily: "Inter-Bold",
+      color: C.white,
+    },
+  });

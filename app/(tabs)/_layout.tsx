@@ -1,3 +1,5 @@
+import { getThemeColors } from "@/constants/theme";
+import { useSettings } from "@/contexts/SettingsContext";
 import { Tabs } from "expo-router";
 import { BookOpen, LayoutGrid, Settings } from "lucide-react-native";
 import { StyleSheet, View } from "react-native";
@@ -5,13 +7,17 @@ import { StyleSheet, View } from "react-native";
 const ORANGE = "#F5A623";
 
 export default function TabLayout() {
+  const { settings } = useSettings();
+  const isDark = settings.theme === "dark";
+  const C = getThemeColors(isDark);
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle: styles.tabBar,
+        tabBarStyle: [styles.tabBar, { backgroundColor: C.cardBg, borderTopColor: C.border }],
         tabBarActiveTintColor: ORANGE,
-        tabBarInactiveTintColor: "#999",
+        tabBarInactiveTintColor: isDark ? "#808080" : "#999",
         tabBarShowLabel: false,
       }}
     >
@@ -19,12 +25,7 @@ export default function TabLayout() {
         name="index"
         options={{
           tabBarIcon: ({ color, size }) => (
-            <View
-              style={[
-                styles.iconContainer,
-                color === ORANGE && styles.iconActive,
-              ]}
-            >
+            <View style={[styles.iconContainer, color === ORANGE && styles.iconActive]}>
               <LayoutGrid size={24} color={color === ORANGE ? "#fff" : color} />
             </View>
           ),
@@ -63,8 +64,7 @@ const styles = StyleSheet.create({
     height: 70,
     paddingBottom: 10,
     paddingTop: 10,
-    backgroundColor: "#fff",
-    borderTopWidth: 0,
+    borderTopWidth: 1,
     elevation: 8,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -2 },
