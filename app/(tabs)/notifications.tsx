@@ -200,7 +200,7 @@ const getStyles = (C: ReturnType<typeof getThemeColors>) =>
       flex: 1,
     },
     notificationTitle: {
-      color: C.textDark,
+      color: C.textLight,
       fontSize: 16,
       fontFamily: "Inter-Bold",
       marginBottom: 6,
