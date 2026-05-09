@@ -83,6 +83,13 @@ export default function SettingsScreen() {
     confirm: "",
   });
 
+  const languageLabelMap: Record<(typeof settings)["language"], string> = {
+    id: t("indonesia"),
+    en: t("english"),
+    ar: "العربية",
+    zh: "中文",
+  };
+
   const SettingItem = ({
     icon: Icon,
     title,
@@ -186,7 +193,7 @@ export default function SettingsScreen() {
               <SettingItem
                 icon={Globe}
                 title={t("language")}
-                subtitle={settings.language === "id" ? t("indonesia") : t("english")}
+                subtitle={languageLabelMap[settings.language]}
                 onPress={() => setShowLanguageModal(true)}
               />
             </View>
@@ -431,6 +438,28 @@ export default function SettingsScreen() {
             >
               <Text style={[s.languageText, settings.language === "en" && s.languageTextActive]}>{t("english")}</Text>
               {settings.language === "en" && <Check size={20} color={C.orange} />}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[s.languageItem, settings.language === "ar" && s.languageItemActive]}
+              onPress={() => {
+                setLanguage("ar");
+                setShowLanguageModal(false);
+              }}
+            >
+              <Text style={[s.languageText, settings.language === "ar" && s.languageTextActive]}>العربية</Text>
+              {settings.language === "ar" && <Check size={20} color={C.orange} />}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[s.languageItem, settings.language === "zh" && s.languageItemActive]}
+              onPress={() => {
+                setLanguage("zh");
+                setShowLanguageModal(false);
+              }}
+            >
+              <Text style={[s.languageText, settings.language === "zh" && s.languageTextActive]}>中文</Text>
+              {settings.language === "zh" && <Check size={20} color={C.orange} />}
             </TouchableOpacity>
 
             <View style={{ height: 40 }} />
