@@ -11,10 +11,10 @@ const { width: W } = Dimensions.get("window");
 
 export default function NotificationsScreen() {
   const router = useRouter();
-  const { fadeAnim, slideAnim } = useFadeInOnFocus(400);
   const { t, settings } = useSettings();
+  const { fadeAnim, slideAnim } = useFadeInOnFocus(400, settings.reducedMotion);
   const isDark = settings.theme === "dark";
-  const C = getThemeColors(isDark);
+  const C = getThemeColors(isDark, settings.highContrast);
   const s = getStyles(C);
   useFonts({
     "Inter-Bold": require("@/assets/fonts/Inter-Bold.ttf"),

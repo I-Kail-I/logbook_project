@@ -1,4 +1,5 @@
 import { getThemeColors } from "@/constants/theme";
+import { resolveFontFamily, scaleFont } from "@/constants/typography";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useFadeInOnFocus } from "@/hooks/useFadeInOnFocus";
 import { useFonts } from "expo-font";
@@ -48,7 +49,7 @@ export default function SettingsScreen() {
   } = useSettings();
   const isDark = settings.theme === "dark";
   const C = getThemeColors(isDark, settings.highContrast);
-  const s = getStyles(C, settings.fontSize);
+  const s = getStyles(C, settings.fontSize, settings.fontFamily, settings.reducedMotion);
   const [fontsLoaded] = useFonts({
     "Inter-Bold": require("@/assets/fonts/Inter-Bold.ttf"),
     "Inter-ExtraBold": require("@/assets/fonts/Inter-ExtraBold.ttf"),
@@ -260,7 +261,7 @@ export default function SettingsScreen() {
       {/* Profile Modal */}
       <Modal
         visible={showProfileModal}
-        animationType="slide"
+        animationType={settings.reducedMotion ? "none" : "slide"}
         transparent
         onRequestClose={() => setShowProfileModal(false)}
       >
@@ -334,7 +335,7 @@ export default function SettingsScreen() {
       {/* Password Modal */}
       <Modal
         visible={showPasswordModal}
-        animationType="slide"
+        animationType={settings.reducedMotion ? "none" : "slide"}
         transparent
         onRequestClose={() => setShowPasswordModal(false)}
       >
@@ -397,7 +398,7 @@ export default function SettingsScreen() {
       {/* Language Modal */}
       <Modal
         visible={showLanguageModal}
-        animationType="slide"
+        animationType={settings.reducedMotion ? "none" : "slide"}
         transparent
         onRequestClose={() => setShowLanguageModal(false)}
       >
@@ -440,7 +441,7 @@ export default function SettingsScreen() {
       {/* Font Family Modal */}
       <Modal
         visible={showFontFamilyModal}
-        animationType="slide"
+        animationType={settings.reducedMotion ? "none" : "slide"}
         transparent
         onRequestClose={() => setShowFontFamilyModal(false)}
       >
@@ -477,7 +478,7 @@ export default function SettingsScreen() {
       {/* Font Size Modal */}
       <Modal
         visible={showFontSizeModal}
-        animationType="slide"
+        animationType={settings.reducedMotion ? "none" : "slide"}
         transparent
         onRequestClose={() => setShowFontSizeModal(false)}
       >
@@ -521,8 +522,16 @@ const fontSizeMultipliers: Record<string, number> = {
   extraLarge: 1.25,
 };
 
-const getStyles = (C: ReturnType<typeof getThemeColors>, fontSize: string) => {
+const getStyles = (
+  C: ReturnType<typeof getThemeColors>,
+  fontSize: string,
+  fontFamily: "inter" | "roboto" | "opensans" | "system",
+  reducedMotion: boolean,
+) => {
   const m = fontSizeMultipliers[fontSize] || 1;
+  const regularFont = resolveFontFamily(fontFamily, "regular");
+  const boldFont = resolveFontFamily(fontFamily, "bold");
+  const extraBoldFont = resolveFontFamily(fontFamily, "extraBold");
 
   return StyleSheet.create({
     root: {
@@ -553,14 +562,14 @@ const getStyles = (C: ReturnType<typeof getThemeColors>, fontSize: string) => {
       alignItems: "center",
     },
     headerTitle: {
-      fontSize: 24,
-      fontFamily: "Inter-ExtraBold",
+      fontSize: scaleFont(24, m),
+      fontFamily: extraBoldFont,
       color: C.white,
       marginBottom: 4,
     },
     headerSubtitle: {
-      fontSize: 14,
-      fontFamily: "Magra-Regular",
+      fontSize: scaleFont(14, m),
+      fontFamily: regularFont,
       color: C.white,
       opacity: 0.9,
     },
@@ -574,8 +583,8 @@ const getStyles = (C: ReturnType<typeof getThemeColors>, fontSize: string) => {
       marginBottom: 24,
     },
     sectionTitle: {
-      fontSize: 14,
-      fontFamily: "Inter-Bold",
+      fontSize: scaleFont(14, m),
+      fontFamily: boldFont,
       color: C.textGray,
       marginBottom: 12,
       marginLeft: 4,
@@ -609,15 +618,15 @@ const getStyles = (C: ReturnType<typeof getThemeColors>, fontSize: string) => {
       flex: 1,
     },
     settingTitle: {
-      fontSize: 14,
-      fontFamily: "Inter-Bold",
+      fontSize: scaleFont(14, m),
+      fontFamily: boldFont,
       color: C.textDark,
       marginBottom: 2,
     },
     settingSubtitle: {
-      fontSize: 12,
+      fontSize: scaleFont(12, m),
       color: C.textLight,
-      fontFamily: "Magra-Regular",
+      fontFamily: regularFont,
     },
     divider: {
       height: 1,
@@ -636,8 +645,8 @@ const getStyles = (C: ReturnType<typeof getThemeColors>, fontSize: string) => {
       gap: 8,
     },
     logoutText: {
-      fontSize: 14,
-      fontFamily: "Inter-Bold",
+      fontSize: scaleFont(14, m),
+      fontFamily: boldFont,
       color: C.red,
     },
 
@@ -662,8 +671,8 @@ const getStyles = (C: ReturnType<typeof getThemeColors>, fontSize: string) => {
       marginBottom: 24,
     },
     modalTitle: {
-      fontSize: 18,
-      fontFamily: "Inter-Bold",
+      fontSize: scaleFont(18, m),
+      fontFamily: boldFont,
       color: C.textDark,
     },
 
@@ -672,8 +681,8 @@ const getStyles = (C: ReturnType<typeof getThemeColors>, fontSize: string) => {
       marginBottom: 16,
     },
     inputLabel: {
-      fontSize: 12,
-      fontFamily: "Magra-Regular",
+      fontSize: scaleFont(12, m),
+      fontFamily: regularFont,
       color: C.textDark,
       marginBottom: 8,
     },
@@ -682,9 +691,9 @@ const getStyles = (C: ReturnType<typeof getThemeColors>, fontSize: string) => {
       borderRadius: 12,
       paddingHorizontal: 16,
       paddingVertical: 14,
-      fontSize: 14,
+      fontSize: scaleFont(14, m),
       color: C.textDark,
-      fontFamily: "Inter-Bold",
+      fontFamily: boldFont,
       borderWidth: 1,
       borderColor: C.border,
     },
@@ -699,8 +708,8 @@ const getStyles = (C: ReturnType<typeof getThemeColors>, fontSize: string) => {
       marginTop: 8,
     },
     saveButtonText: {
-      fontSize: 14,
-      fontFamily: "Inter-Bold",
+      fontSize: scaleFont(14, m),
+      fontFamily: boldFont,
       color: C.white,
     },
 
@@ -722,9 +731,12 @@ const getStyles = (C: ReturnType<typeof getThemeColors>, fontSize: string) => {
       borderColor: C.orange,
     },
     languageText: {
-      fontSize: 14 * m,
-      fontFamily: "Inter-Bold",
+      fontSize: scaleFont(14, m),
+      fontFamily: boldFont,
       color: C.textDark,
+    },
+    animatedContent: {
+      opacity: reducedMotion ? 1 : undefined,
     },
     languageTextActive: {
       color: C.orange,

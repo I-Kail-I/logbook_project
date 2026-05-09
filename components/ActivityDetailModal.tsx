@@ -8,6 +8,8 @@ import { Activity } from "./ActivityCard";
 interface ActivityDetailModalProps {
   activity: Activity | null;
   isDark: boolean;
+  highContrast?: boolean;
+  reducedMotion?: boolean;
   onClose: () => void;
   onPrint: (activity: Activity) => void;
   getStatusText: (status: string) => string;
@@ -17,17 +19,19 @@ interface ActivityDetailModalProps {
 export function ActivityDetailModal({
   activity,
   isDark,
+  highContrast = false,
+  reducedMotion = false,
   onClose,
   onPrint,
   getStatusText,
   getStatusColor,
 }: ActivityDetailModalProps) {
   const { t } = useSettings();
-  const C = getThemeColors(isDark);
+  const C = getThemeColors(isDark, highContrast);
   const s = getStyles(C);
 
   return (
-    <Modal visible={activity !== null} animationType="slide" transparent onRequestClose={onClose}>
+    <Modal visible={activity !== null} animationType={reducedMotion ? "none" : "slide"} transparent onRequestClose={onClose}>
       <View style={s.modalOverlay}>
         <View style={s.modalContent}>
           <View style={s.modalHeader}>

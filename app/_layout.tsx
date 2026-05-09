@@ -1,3 +1,4 @@
+import { FontProvider } from "@/contexts/FontContext";
 import { SettingsProvider, useSettings } from "@/contexts/SettingsContext";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { Stack } from "expo-router";
@@ -21,7 +22,9 @@ function RootLayoutNav() {
 export default function RootLayout() {
   return (
     <SettingsProvider>
-      <RootLayoutNav />
+      <FontProvider>
+        <RootLayoutNav />
+      </FontProvider>
     </SettingsProvider>
   );
 }

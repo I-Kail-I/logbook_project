@@ -9,6 +9,8 @@ interface PrintPreviewModalProps {
   visible: boolean;
   activities: Activity[];
   isDark: boolean;
+  highContrast?: boolean;
+  reducedMotion?: boolean;
   onClose: () => void;
   onPrint: (activities: Activity[]) => void;
   onSharePDF: (activities: Activity[]) => void;
@@ -21,6 +23,8 @@ export function PrintPreviewModal({
   visible,
   activities,
   isDark,
+  highContrast = false,
+  reducedMotion = false,
   onClose,
   onPrint,
   onSharePDF,
@@ -29,11 +33,11 @@ export function PrintPreviewModal({
   today,
 }: PrintPreviewModalProps) {
   const { t } = useSettings();
-  const C = getThemeColors(isDark);
+  const C = getThemeColors(isDark, highContrast);
   const s = getStyles(C);
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+    <Modal visible={visible} animationType={reducedMotion ? "none" : "slide"} transparent onRequestClose={onClose}>
       <View style={s.modalOverlay}>
         <View style={s.modalContent}>
           <View style={s.modalHeader}>

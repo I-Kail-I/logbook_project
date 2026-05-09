@@ -2,13 +2,15 @@ import { ActivityCard, ActivityDetailModal, PrintPreviewModal, type Activity } f
 import { getThemeColors } from "@/constants/theme";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useFadeInOnFocus } from "@/hooks/useFadeInOnFocus";
+import { createRefreshHandler } from "@/utils/refresh";
 import { useFonts } from "expo-font";
+import * as Haptics from "expo-haptics";
 import * as Print from "expo-print";
 import { useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { BarChart3, Bell, Calendar, Check, FileText, Plus, Printer, X } from "lucide-react-native";
-import React, { useState } from "react";
-import { Animated, Dimensions, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useCallback, useState } from "react";
+import { Animated, Dimensions, RefreshControl, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const { width: W, height: H } = Dimensions.get("window");
 
@@ -49,10 +51,10 @@ const ACTIVITIES: Activity[] = [
 
 export default function DashboardScreen() {
   const router = useRouter();
-  const { fadeAnim, slideAnim } = useFadeInOnFocus(400);
   const { t, settings } = useSettings();
+  const { fadeAnim, slideAnim } = useFadeInOnFocus(400, settings.reducedMotion);
   const isDark = settings.theme === "dark";
-  const C = getThemeColors(isDark);
+  const C = getThemeColors(isDark, settings.highContrast);
   const s = getStyles(C);
 
   const [selectedActivities, setSelectedActivities] = useState<number[]>([]);
@@ -60,6 +62,7 @@ export default function DashboardScreen() {
   const [detailActivity, setDetailActivity] = useState<Activity | null>(null);
   const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [previewActivities, setPreviewActivities] = useState<Activity[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   const [fontsLoaded] = useFonts({
     "Inter-Bold": require("@/assets/fonts/Inter-Bold.ttf"),
@@ -204,13 +207,28 @@ export default function DashboardScreen() {
     return colorMap[status] || "#999999";
   };
 
+  const onRefresh = useCallback(
+    createRefreshHandler(setRefreshing, () => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)),
+    [],
+  );
+
   return (
     <View style={s.root}>
       <StatusBar barStyle="light-content" backgroundColor={C.orange} />
 
       <View style={{ backgroundColor: C.orange, height: 1 }} />
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={C.orange}
+            progressViewOffset={110}
+          />
+        }
+      >
         <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
           {/* Header Section */}
           <View style={s.header}>
@@ -316,6 +334,7 @@ export default function DashboardScreen() {
                 <ActivityCard
                   activity={item}
                   isDark={isDark}
+                  highContrast={settings.highContrast}
                   onPress={() => {
                     if (selectMode) {
                       toggleSelection(item.id);
@@ -350,6 +369,8 @@ export default function DashboardScreen() {
       <ActivityDetailModal
         activity={detailActivity}
         isDark={isDark}
+        highContrast={settings.highContrast}
+        reducedMotion={settings.reducedMotion}
         onClose={() => setDetailActivity(null)}
         onPrint={(activity) => openPrintPreview([activity])}
         getStatusText={getStatusText}
@@ -361,6 +382,8 @@ export default function DashboardScreen() {
         visible={showPrintPreview}
         activities={previewActivities}
         isDark={isDark}
+        highContrast={settings.highContrast}
+        reducedMotion={settings.reducedMotion}
         onClose={() => setShowPrintPreview(false)}
         onPrint={handlePrint}
         onSharePDF={handleSharePDF}

@@ -2,8 +2,10 @@ import { ActivityCard, ActivityDetailModal, PrintPreviewModal, type Activity } f
 import { getThemeColors } from "@/constants/theme";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useFadeInOnFocus } from "@/hooks/useFadeInOnFocus";
+import { createRefreshHandler } from "@/utils/refresh";
 import * as DocumentPicker from "expo-document-picker";
 import { useFonts } from "expo-font";
+import * as Haptics from "expo-haptics";
 import * as Print from "expo-print";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
@@ -13,6 +15,7 @@ import {
   Animated,
   Dimensions,
   Modal,
+  RefreshControl,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -63,10 +66,10 @@ const LOGBOOK_ACTIVITIES: Activity[] = [
 export default function LogbookScreen() {
   const router = useRouter();
   const { openModal } = useLocalSearchParams<{ openModal?: string }>();
-  const { fadeAnim, slideAnim } = useFadeInOnFocus(400);
   const { t, settings } = useSettings();
+  const { fadeAnim, slideAnim } = useFadeInOnFocus(400, settings.reducedMotion);
   const isDark = settings.theme === "dark";
-  const C = getThemeColors(isDark);
+  const C = getThemeColors(isDark, settings.highContrast);
   const s = getStyles(C);
 
   const [fontsLoaded] = useFonts({
@@ -79,6 +82,7 @@ export default function LogbookScreen() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showForm, setShowForm] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     if (openModal === "true") {
@@ -284,6 +288,12 @@ export default function LogbookScreen() {
     return days;
   };
 
+  const onRefresh = createRefreshHandler(
+    setRefreshing,
+    () => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success),
+    900,
+  );
+
   return (
     <View style={s.root}>
       <StatusBar barStyle="light-content" backgroundColor={C.orange} />
@@ -336,7 +346,17 @@ export default function LogbookScreen() {
         </View>
 
         {/* Selected Date Activities */}
-        <ScrollView style={s.activitiesSection}>
+        <ScrollView
+          style={s.activitiesSection}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={C.orange}
+              progressViewOffset={110}
+            />
+          }
+        >
           <Text style={s.selectedDateText}>{selectedDateStr}</Text>
 
           {/* Activity Cards */}
@@ -345,6 +365,7 @@ export default function LogbookScreen() {
               key={item.id}
               activity={item}
               isDark={isDark}
+              highContrast={settings.highContrast}
               onPress={() => setDetailActivity(item)}
               getStatusText={getStatusText}
               getStatusColor={getStatusColor}
@@ -364,6 +385,8 @@ export default function LogbookScreen() {
       <ActivityDetailModal
         activity={detailActivity}
         isDark={isDark}
+        highContrast={settings.highContrast}
+        reducedMotion={settings.reducedMotion}
         onClose={() => setDetailActivity(null)}
         onPrint={(activity) => openPrintPreview([activity])}
         getStatusText={getStatusText}
@@ -375,6 +398,8 @@ export default function LogbookScreen() {
         visible={showPrintPreview}
         activities={previewActivities}
         isDark={isDark}
+        highContrast={settings.highContrast}
+        reducedMotion={settings.reducedMotion}
         onClose={() => setShowPrintPreview(false)}
         onPrint={handlePrint}
         onSharePDF={handleSharePDF}
@@ -384,7 +409,12 @@ export default function LogbookScreen() {
       />
 
       {/* Add Log Modal */}
-      <Modal visible={showForm} animationType="slide" transparent onRequestClose={() => setShowForm(false)}>
+      <Modal
+        visible={showForm}
+        animationType={settings.reducedMotion ? "none" : "slide"}
+        transparent
+        onRequestClose={() => setShowForm(false)}
+      >
         <View style={s.modalOverlay}>
           <View style={s.modalContent}>
             {/* Modal Header */}

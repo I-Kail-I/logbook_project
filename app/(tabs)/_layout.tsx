@@ -9,7 +9,7 @@ const ORANGE = "#F5A623";
 export default function TabLayout() {
   const { settings } = useSettings();
   const isDark = settings.theme === "dark";
-  const C = getThemeColors(isDark);
+  const C = getThemeColors(isDark, settings.highContrast);
 
   return (
     <Tabs

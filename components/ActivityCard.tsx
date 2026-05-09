@@ -18,6 +18,7 @@ export interface Activity {
 interface ActivityCardProps {
   activity: Activity;
   isDark: boolean;
+  highContrast?: boolean;
   isSelected?: boolean;
   selectMode?: boolean;
   onPress?: () => void;
@@ -29,6 +30,7 @@ interface ActivityCardProps {
 export function ActivityCard({
   activity,
   isDark,
+  highContrast = false,
   isSelected,
   selectMode,
   onPress,
@@ -36,7 +38,7 @@ export function ActivityCard({
   getStatusText,
   getStatusColor,
 }: ActivityCardProps) {
-  const C = getThemeColors(isDark);
+  const C = getThemeColors(isDark, highContrast);
   const s = getStyles(C);
 
   return (
