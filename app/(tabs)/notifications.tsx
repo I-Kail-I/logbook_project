@@ -83,9 +83,8 @@ export default function NotificationsScreen() {
             <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
               <ArrowLeft size={24} color={C.white} />
             </TouchableOpacity>
-            <Text style={s.headerTitle}>{t("notifications_title")}</Text>
-            <View style={s.headerSpacer} />
           </View>
+          <Text style={s.headerTitle}>{t("notifications_title")}</Text>
           <Text style={s.headerSubtitle}>
             {unreadCount} {t("unread")}
           </Text>
@@ -128,15 +127,16 @@ const getStyles = (C: ReturnType<typeof getThemeColors>) =>
     },
     header: {
       backgroundColor: C.orange,
-      paddingTop: 48,
-      paddingBottom: 24,
-      paddingHorizontal: 24,
-      borderBottomLeftRadius: 24,
-      borderBottomRightRadius: 24,
+      paddingTop: 50,
+      paddingBottom: 30,
+      paddingHorizontal: 20,
+      borderBottomLeftRadius: 30,
+      borderBottomRightRadius: 30,
     },
     headerTop: {
-      flexDirection: "column",
-      marginTop: 20,
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 10,
     },
     backBtn: {
       width: 44,
@@ -147,30 +147,26 @@ const getStyles = (C: ReturnType<typeof getThemeColors>) =>
       alignItems: "center",
     },
     headerTitle: {
-      marginTop: 9,
       color: C.white,
-      fontSize: 25,
-      fontFamily: "Inter-Bold",
-    },
-    headerSpacer: {
-      width: 44,
+      fontSize: 24,
+      fontFamily: "Inter-ExtraBold",
+      marginBottom: 4,
     },
     headerSubtitle: {
-      marginTop: 5,
       color: "rgba(255,255,255,0.87)",
       fontSize: 14,
-      fontFamily: "ABeeZee-Regular",
+      fontFamily: "Magra-Regular",
     },
     content: {
       flex: 1,
-      marginTop: 10,
     },
     contentContainer: {
-      paddingHorizontal: 24,
-      paddingBottom: 32,
+      paddingHorizontal: 16,
+      paddingTop: 20,
+      paddingBottom: 100,
     },
     notificationCard: {
-      backgroundColor: C.white,
+      backgroundColor: C.cardBg,
       borderRadius: 20,
       padding: 16,
       marginBottom: 16,
