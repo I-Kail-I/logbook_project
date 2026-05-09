@@ -1,50 +1,128 @@
-# Welcome to your Expo app 👋
+# Logbook Mobile App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Logbook is an Expo + React Native mobile application for recording daily work activities, tracking productivity, and exporting activity reports to PDF.
 
-## Get started
+## Features
 
-1. Install dependencies
+- Daily logbook creation and activity history
+- Dashboard with activity cards and quick navigation
+- Calendar-based logbook browsing
+- Print preview and PDF sharing
+- Bilingual interface (Bahasa Indonesia and English)
+- Dark mode and high contrast mode
+- Accessibility settings:
+  - Font family: Inter, Roboto, Open Sans, System
+  - Font size: Small, Normal, Large, Extra Large
+  - Reduced motion support
+- Pull-to-refresh on Dashboard and Logbook with haptic feedback
+- Local settings persistence with AsyncStorage
 
-   ```bash
-   npm install
-   ```
+## Screenshots / Recordings
 
-2. Start the app
+- `docs/screenshots/login.png` (placeholder)
+- `docs/screenshots/dashboard.png` (placeholder)
+- `docs/screenshots/logbook.png` (placeholder)
+- `docs/screenshots/settings-accessibility.png` (placeholder)
+- `docs/recordings/refresh-demo.mp4` (placeholder)
 
-   ```bash
-   npx expo start
-   ```
+## Tech Stack
 
-In the output, you'll find options to open the app in a
+- [Expo](https://docs.expo.dev/)
+- [React Native](https://reactnative.dev/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Expo Router](https://docs.expo.dev/router/introduction/)
+- [AsyncStorage](https://react-native-async-storage.github.io/async-storage/)
+- Expo modules: `expo-font`, `expo-notifications`, `expo-print`, `expo-sharing`, `expo-haptics`
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Architecture Overview
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+Top-level structure:
 
-## Get a fresh project
+- `app/` - route-based screens (`expo-router`)
+- `components/` - reusable UI components
+- `contexts/` - global app state (settings, font)
+- `constants/` - theme, translations, typography helpers
+- `hooks/` - reusable behavior hooks (animations, etc.)
+- `utils/` - utility logic (e.g., refresh handler)
+- `assets/` - images and fonts
 
-When you're ready, run:
+## Installation and Setup
+
+### Prerequisites
+
+- Node.js 18+
+- npm 9+
+- Expo CLI (optional, via `npx expo ...`)
+
+### Install
 
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Run the app
 
-## Learn more
+```bash
+npm run start
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+Then open on:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- Android emulator/device
+- iOS simulator/device
+- Expo Go
+- Web (`npm run web`)
 
-## Join the community
+## Development Guide
 
-Join our community of developers creating universal apps.
+### Common scripts
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- `npm run start` - run dev server
+- `npm run android` - run on Android
+- `npm run ios` - run on iOS
+- `npm run web` - run web version
+- `npm run lint` - run linter
+- `npm run test` - run unit tests
+- `npm run test:ci` - run tests with coverage
+
+### Localization
+
+- Translation keys live in `constants/translations.ts`.
+- Add values for both `id` and `en` locales for every new key.
+
+### Theming and accessibility
+
+- Color tokens are defined in `constants/theme.ts`.
+- Settings state is managed in `contexts/SettingsContext.tsx`.
+- Global font behavior is provided by `contexts/FontContext.tsx`.
+
+## Testing
+
+The project uses Jest with `jest-expo`.
+
+- Test config: `jest.config.js`
+- Test setup: `jest.setup.ts`
+- Example coverage:
+  - Theme contrast behavior
+  - Typography font mapping/scaling
+  - Pull-to-refresh timing and completion flow
+
+Run:
+
+```bash
+npm run test
+```
+
+## Contributing
+
+1. Fork and create a feature branch.
+2. Keep pull requests focused and small.
+3. Ensure lint and tests pass before opening a PR.
+4. Use clear commit messages (`feat:`, `fix:`, `docs:`, `test:`).
+5. Include screenshots/recordings for UI changes.
+
+## Production Notes
+
+- Configure push notification credentials before release.
+- Replace placeholder/mock data with API integration.
+- Add real media assets in the screenshots/recordings paths.
