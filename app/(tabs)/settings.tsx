@@ -1,54 +1,73 @@
 import { getThemeColors } from "@/constants/theme";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useFadeInOnFocus } from "@/hooks/useFadeInOnFocus";
-import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useFonts } from "expo-font";
 import { useRouter } from "expo-router";
 import {
-  ArrowLeft,
-  Bell,
-  Check,
-  ChevronRight,
-  Globe,
-  HelpCircle,
-  Lock,
-  LogOut,
-  Moon,
-  User,
-  X,
+    ArrowLeft,
+    Bell,
+    Check,
+    ChevronRight,
+    Contrast,
+    Globe,
+    HelpCircle,
+    Lock,
+    LogOut,
+    Moon,
+    Type,
+    User,
+    X,
+    Zap,
 } from "lucide-react-native";
 import React, { useState } from "react";
 import {
-  Animated,
-  Modal,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Switch,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Animated,
+    Modal,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Switch,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { fadeAnim, slideAnim } = useFadeInOnFocus(400);
-  const { settings, toggleNotifications, toggleTheme, setLanguage, t } = useSettings();
-  usePushNotifications();
+  const {
+    settings,
+    toggleNotifications,
+    toggleTheme,
+    setLanguage,
+    setFontFamily,
+    setFontSize,
+    toggleHighContrast,
+    toggleReducedMotion,
+    t,
+  } = useSettings();
   const isDark = settings.theme === "dark";
-  const C = getThemeColors(isDark);
-  const s = getStyles(C);
+  const C = getThemeColors(isDark, settings.highContrast);
+  const s = getStyles(C, settings.fontSize);
   const [fontsLoaded] = useFonts({
     "Inter-Bold": require("@/assets/fonts/Inter-Bold.ttf"),
     "Inter-ExtraBold": require("@/assets/fonts/Inter-ExtraBold.ttf"),
     "ABeeZee-Regular": require("@/assets/fonts/ABeeZee-Regular.ttf"),
     "Magra-Regular": require("@/assets/fonts/Magra-Regular.ttf"),
+    "Roboto-Regular": require("@/assets/fonts/Roboto-Regular.ttf"),
+    "Roboto-Bold": require("@/assets/fonts/Roboto-Bold.ttf"),
+    "OpenSans-Regular": require("@/assets/fonts/OpenSans-Regular.ttf"),
+    "OpenSans-Bold": require("@/assets/fonts/OpenSans-Bold.ttf"),
   });
+
+  const { fadeAnim, slideAnim } = useFadeInOnFocus(400, settings.reducedMotion);
+  void fontsLoaded;
 
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showLanguageModal, setShowLanguageModal] = useState(false);
+  const [showFontFamilyModal, setShowFontFamilyModal] = useState(false);
+  const [showFontSizeModal, setShowFontSizeModal] = useState(false);
 
   const [profileData, setProfileData] = useState({
     nama: "",
@@ -168,6 +187,54 @@ export default function SettingsScreen() {
                 title={t("language")}
                 subtitle={settings.language === "id" ? t("indonesia") : t("english")}
                 onPress={() => setShowLanguageModal(true)}
+              />
+            </View>
+          </View>
+
+          {/* Appearance & Accessibility Section */}
+          <View style={s.section}>
+            <Text style={s.sectionTitle}>{t("appearance")}</Text>
+            <View style={s.card}>
+              <SettingItem
+                icon={Type}
+                title={t("font_family")}
+                subtitle={t(`font_${settings.fontFamily}`)}
+                onPress={() => setShowFontFamilyModal(true)}
+              />
+              <View style={s.divider} />
+              <SettingItem
+                icon={Type}
+                title={t("font_size")}
+                subtitle={t(`size_${settings.fontSize === "extraLarge" ? "extra_large" : settings.fontSize}` as any)}
+                onPress={() => setShowFontSizeModal(true)}
+              />
+              <View style={s.divider} />
+              <SettingItem
+                icon={Contrast}
+                title={t("high_contrast")}
+                subtitle={settings.highContrast ? t("on") : t("off")}
+                rightElement={
+                  <Switch
+                    value={settings.highContrast}
+                    onValueChange={toggleHighContrast}
+                    trackColor={{ false: "#E0E0E0", true: "#FFB84D" }}
+                    thumbColor={settings.highContrast ? "#F5A623" : "#fff"}
+                  />
+                }
+              />
+              <View style={s.divider} />
+              <SettingItem
+                icon={Zap}
+                title={t("reduced_motion")}
+                subtitle={settings.reducedMotion ? t("on") : t("off")}
+                rightElement={
+                  <Switch
+                    value={settings.reducedMotion}
+                    onValueChange={toggleReducedMotion}
+                    trackColor={{ false: "#E0E0E0", true: "#FFB84D" }}
+                    thumbColor={settings.reducedMotion ? "#F5A623" : "#fff"}
+                  />
+                }
               />
             </View>
           </View>
@@ -369,12 +436,95 @@ export default function SettingsScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Font Family Modal */}
+      <Modal
+        visible={showFontFamilyModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowFontFamilyModal(false)}
+      >
+        <View style={s.modalOverlay}>
+          <View style={s.modalContent}>
+            <View style={s.modalHeader}>
+              <Text style={s.modalTitle}>{t("font_family")}</Text>
+              <TouchableOpacity onPress={() => setShowFontFamilyModal(false)}>
+                <X size={24} color={C.textGray} />
+              </TouchableOpacity>
+            </View>
+
+            {(["inter", "roboto", "opensans", "system"] as const).map((font) => (
+              <TouchableOpacity
+                key={font}
+                style={[s.languageItem, settings.fontFamily === font && s.languageItemActive]}
+                onPress={() => {
+                  setFontFamily(font);
+                  setShowFontFamilyModal(false);
+                }}
+              >
+                <Text style={[s.languageText, settings.fontFamily === font && s.languageTextActive]}>
+                  {t(`font_${font}` as any)}
+                </Text>
+                {settings.fontFamily === font && <Check size={20} color={C.orange} />}
+              </TouchableOpacity>
+            ))}
+
+            <View style={{ height: 40 }} />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Font Size Modal */}
+      <Modal
+        visible={showFontSizeModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowFontSizeModal(false)}
+      >
+        <View style={s.modalOverlay}>
+          <View style={s.modalContent}>
+            <View style={s.modalHeader}>
+              <Text style={s.modalTitle}>{t("font_size")}</Text>
+              <TouchableOpacity onPress={() => setShowFontSizeModal(false)}>
+                <X size={24} color={C.textGray} />
+              </TouchableOpacity>
+            </View>
+
+            {(["small", "normal", "large", "extraLarge"] as const).map((size) => (
+              <TouchableOpacity
+                key={size}
+                style={[s.languageItem, settings.fontSize === size && s.languageItemActive]}
+                onPress={() => {
+                  setFontSize(size);
+                  setShowFontSizeModal(false);
+                }}
+              >
+                <Text style={[s.languageText, settings.fontSize === size && s.languageTextActive]}>
+                  {t(`size_${size === "extraLarge" ? "extra_large" : size}` as any)}
+                </Text>
+                {settings.fontSize === size && <Check size={20} color={C.orange} />}
+              </TouchableOpacity>
+            ))}
+
+            <View style={{ height: 40 }} />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
 
-const getStyles = (C: ReturnType<typeof getThemeColors>) =>
-  StyleSheet.create({
+const fontSizeMultipliers: Record<string, number> = {
+  small: 0.875,
+  normal: 1,
+  large: 1.125,
+  extraLarge: 1.25,
+};
+
+const getStyles = (C: ReturnType<typeof getThemeColors>, fontSize: string) => {
+  const m = fontSizeMultipliers[fontSize] || 1;
+
+  return StyleSheet.create({
     root: {
       flex: 1,
       backgroundColor: C.bgGray,
@@ -572,7 +722,7 @@ const getStyles = (C: ReturnType<typeof getThemeColors>) =>
       borderColor: C.orange,
     },
     languageText: {
-      fontSize: 14,
+      fontSize: 14 * m,
       fontFamily: "Inter-Bold",
       color: C.textDark,
     },
@@ -580,3 +730,4 @@ const getStyles = (C: ReturnType<typeof getThemeColors>) =>
       color: C.orange,
     },
   });
+};

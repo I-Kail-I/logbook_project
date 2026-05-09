@@ -4,11 +4,18 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 
 const STORAGE_KEY = "@app_settings";
 
+export type FontFamily = "inter" | "roboto" | "opensans" | "system";
+export type FontSize = "small" | "normal" | "large" | "extraLarge";
+
 export interface AppSettings {
   language: Lang;
   notificationsEnabled: boolean;
   theme: "light" | "dark";
   pushToken: string | null;
+  fontFamily: FontFamily;
+  fontSize: FontSize;
+  highContrast: boolean;
+  reducedMotion: boolean;
 }
 
 const defaultSettings: AppSettings = {
@@ -16,6 +23,10 @@ const defaultSettings: AppSettings = {
   notificationsEnabled: false,
   theme: "light",
   pushToken: null,
+  fontFamily: "inter",
+  fontSize: "normal",
+  highContrast: false,
+  reducedMotion: false,
 };
 
 interface SettingsContextType {
@@ -26,7 +37,13 @@ interface SettingsContextType {
   setTheme: (theme: "light" | "dark") => Promise<void>;
   toggleTheme: () => Promise<void>;
   setPushToken: (token: string | null) => Promise<void>;
+  setFontFamily: (font: FontFamily) => Promise<void>;
+  setFontSize: (size: FontSize) => Promise<void>;
+  toggleHighContrast: () => Promise<void>;
+  toggleReducedMotion: () => Promise<void>;
   t: (key: TranslationKey) => string;
+  getFontFamily: () => string;
+  getFontSizeMultiplier: () => number;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -69,6 +86,38 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
   const setPushToken = useCallback(async (pushToken: string | null) => persist({ pushToken }), [persist]);
 
+  const setFontFamily = useCallback(async (fontFamily: FontFamily) => persist({ fontFamily }), [persist]);
+
+  const setFontSize = useCallback(async (fontSize: FontSize) => persist({ fontSize }), [persist]);
+
+  const toggleHighContrast = useCallback(async () => {
+    persist({ highContrast: !settings.highContrast });
+  }, [persist, settings.highContrast]);
+
+  const toggleReducedMotion = useCallback(async () => {
+    persist({ reducedMotion: !settings.reducedMotion });
+  }, [persist, settings.reducedMotion]);
+
+  const getFontFamily = useCallback(() => {
+    const fontMap: Record<FontFamily, string> = {
+      inter: "Inter",
+      roboto: "Roboto",
+      opensans: "OpenSans",
+      system: "System",
+    };
+    return fontMap[settings.fontFamily];
+  }, [settings.fontFamily]);
+
+  const getFontSizeMultiplier = useCallback(() => {
+    const sizeMap: Record<FontSize, number> = {
+      small: 0.875,
+      normal: 1,
+      large: 1.125,
+      extraLarge: 1.25,
+    };
+    return sizeMap[settings.fontSize];
+  }, [settings.fontSize]);
+
   const t = useCallback((key: TranslationKey) => translations[settings.language][key] || key, [settings.language]);
 
   return (
@@ -81,7 +130,13 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         setTheme,
         toggleTheme,
         setPushToken,
+        setFontFamily,
+        setFontSize,
+        toggleHighContrast,
+        toggleReducedMotion,
         t,
+        getFontFamily,
+        getFontSizeMultiplier,
       }}
     >
       {children}

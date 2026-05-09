@@ -94,6 +94,29 @@ export const translations = {
     in_progress_status: "Dalam Proses",
     pending_status: "Menunggu",
 
+    // Activity Categories
+    cat_dokumentasi: "Dokumentasi",
+    cat_meeting: "Meeting",
+    cat_development: "Development",
+    cat_new_logbook: "New Logbook",
+
+    // Accessibility & Appearance
+    appearance: "Tampilan & Aksesibilitas",
+    font_family: "Jenis Font",
+    font_size: "Ukuran Font",
+    high_contrast: "Kontras Tinggi",
+    reduced_motion: "Kurangi Animasi",
+    font_inter: "Inter",
+    font_roboto: "Roboto",
+    font_opensans: "Open Sans",
+    font_system: "Sistem Default",
+    size_small: "Kecil",
+    size_normal: "Normal",
+    size_large: "Besar",
+    size_extra_large: "Sangat Besar",
+    on: "Aktif",
+    off: "Nonaktif",
+
     // Notifications
     notifications_title: "Notifikasi",
     unread: "belum dibaca",
@@ -233,6 +256,29 @@ export const translations = {
     print: "Print",
     in_progress_status: "In Progress",
     pending_status: "Pending",
+
+    // Activity Categories
+    cat_dokumentasi: "Documentation",
+    cat_meeting: "Meeting",
+    cat_development: "Development",
+    cat_new_logbook: "New Logbook",
+
+    // Accessibility & Appearance
+    appearance: "Appearance & Accessibility",
+    font_family: "Font Family",
+    font_size: "Font Size",
+    high_contrast: "High Contrast",
+    reduced_motion: "Reduce Motion",
+    font_inter: "Inter",
+    font_roboto: "Roboto",
+    font_opensans: "Open Sans",
+    font_system: "System Default",
+    size_small: "Small",
+    size_normal: "Normal",
+    size_large: "Large",
+    size_extra_large: "Extra Large",
+    on: "On",
+    off: "Off",
 
     // Notifications
     notifications_title: "Notifications",

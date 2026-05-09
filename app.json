@@ -45,7 +45,11 @@
             "./assets/fonts/Inter-ExtraBold.ttf",
             "./assets/fonts/ABeeZee-Regular.ttf",
             "./assets/fonts/Magra-Regular.ttf",
-            "./assets/fonts/Magra-Bold.ttf"
+            "./assets/fonts/Magra-Bold.ttf",
+            "./assets/fonts/Roboto-Regular.ttf",
+            "./assets/fonts/Roboto-Bold.ttf",
+            "./assets/fonts/OpenSans-Regular.ttf",
+            "./assets/fonts/OpenSans-Bold.ttf"
           ]
         }
       ],
