@@ -304,50 +304,9 @@ export default function LogbookScreen() {
           transform: [{ translateY: slideAnim }],
         }}
       >
-        {/* Header */}
-        <View style={s.header}>
-          <View style={s.headerTop}>
-            <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
-              <ArrowLeft size={24} color={C.white} />
-            </TouchableOpacity>
-          </View>
-          <Text style={s.headerTitle}>{t("my_logbook")}</Text>
-          <Text style={s.headerSubtitle}>{t("record_activity")}</Text>
-        </View>
-
-        {/* Calendar Card */}
-        <View style={s.calendarCard}>
-          {/* Month Navigation */}
-          <View style={s.monthNav}>
-            <TouchableOpacity
-              onPress={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
-            >
-              <ChevronLeft size={24} color={C.textDark} />
-            </TouchableOpacity>
-            <Text style={s.monthText}>{monthYear.charAt(0).toUpperCase() + monthYear.slice(1)}</Text>
-            <TouchableOpacity
-              onPress={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
-            >
-              <ChevronRight size={24} color={C.textDark} />
-            </TouchableOpacity>
-          </View>
-
-          {/* Day Headers */}
-          <View style={s.dayHeaders}>
-            {DAYS.map((day) => (
-              <Text key={day} style={s.dayHeaderText}>
-                {day}
-              </Text>
-            ))}
-          </View>
-
-          {/* Calendar Grid */}
-          <View style={s.calendarGrid}>{renderCalendar()}</View>
-        </View>
-
-        {/* Selected Date Activities */}
         <ScrollView
-          style={s.activitiesSection}
+          style={s.pageScroll}
+          contentContainerStyle={s.pageContent}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -356,23 +315,66 @@ export default function LogbookScreen() {
               progressViewOffset={110}
             />
           }
+          showsVerticalScrollIndicator={false}
         >
-          <Text style={s.selectedDateText}>{selectedDateStr}</Text>
+          {/* Header */}
+          <View style={s.header}>
+            <View style={s.headerTop}>
+              <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
+                <ArrowLeft size={24} color={C.white} />
+              </TouchableOpacity>
+            </View>
+            <Text style={s.headerTitle}>{t("my_logbook")}</Text>
+            <Text style={s.headerSubtitle}>{t("record_activity")}</Text>
+          </View>
 
-          {/* Activity Cards */}
-          {LOGBOOK_ACTIVITIES.map((item) => (
-            <ActivityCard
-              key={item.id}
-              activity={item}
-              isDark={isDark}
-              highContrast={settings.highContrast}
-              onPress={() => setDetailActivity(item)}
-              getStatusText={getStatusText}
-              getStatusColor={getStatusColor}
-            />
-          ))}
+          {/* Calendar Card */}
+          <View style={s.calendarCard}>
+            {/* Month Navigation */}
+            <View style={s.monthNav}>
+              <TouchableOpacity
+                onPress={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
+              >
+                <ChevronLeft size={24} color={C.textDark} />
+              </TouchableOpacity>
+              <Text style={s.monthText}>{monthYear.charAt(0).toUpperCase() + monthYear.slice(1)}</Text>
+              <TouchableOpacity
+                onPress={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
+              >
+                <ChevronRight size={24} color={C.textDark} />
+              </TouchableOpacity>
+            </View>
 
-          <View style={{ height: 120 }} />
+            {/* Day Headers */}
+            <View style={s.dayHeaders}>
+              {DAYS.map((day) => (
+                <Text key={day} style={s.dayHeaderText}>
+                  {day}
+                </Text>
+              ))}
+            </View>
+
+            {/* Calendar Grid */}
+            <View style={s.calendarGrid}>{renderCalendar()}</View>
+          </View>
+
+          {/* Selected Date Activities */}
+          <View style={s.activitiesSection}>
+            <Text style={s.selectedDateText}>{selectedDateStr}</Text>
+
+            {/* Activity Cards */}
+            {LOGBOOK_ACTIVITIES.map((item) => (
+              <ActivityCard
+                key={item.id}
+                activity={item}
+                isDark={isDark}
+                highContrast={settings.highContrast}
+                onPress={() => setDetailActivity(item)}
+                getStatusText={getStatusText}
+                getStatusColor={getStatusColor}
+              />
+            ))}
+          </View>
         </ScrollView>
       </Animated.View>
 
@@ -519,6 +521,12 @@ const getStyles = (C: ReturnType<typeof getThemeColors>) =>
     root: {
       flex: 1,
       backgroundColor: C.bgGray,
+    },
+    pageScroll: {
+      flex: 1,
+    },
+    pageContent: {
+      paddingBottom: 120,
     },
 
     // Header
