@@ -164,6 +164,10 @@ export default function LoginScreen() {
       // const { data } = await axios.post('/api/auth/login', { nip, password });
       // await AsyncStorage.setItem('token', data.token);
       await new Promise((r) => setTimeout(r, 1000));
+      if (nip.trim().toLowerCase() === "123" && password.trim() === "admin") {
+        router.replace("/(admin)");
+        return;
+      }
       router.replace("/(tabs)");
     } catch (err) {
       console.error(err);
