@@ -10,7 +10,11 @@ import * as Print from "expo-print";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { ArrowLeft, ChevronLeft, ChevronRight, Plus, X } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+import { Alert } from "react-native";
+import logbookService from "@/services/logbook";
+import storage from "@/services/storage";
+import { Tupoksi, Logbook as LogbookType } from "@/services/types";
 import {
   Animated,
   Dimensions,
@@ -84,6 +88,29 @@ export default function LogbookScreen() {
   const [showForm, setShowForm] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
+  const fetchTupoksi = useCallback(async () => {
+    setLoadingTupoksi(true);
+    const result = await logbookService.getTupoksi();
+    if (result.success && result.data) {
+      setTupoksiList(result.data);
+    }
+    setLoadingTupoksi(false);
+  }, []);
+
+  const fetchLogbooks = useCallback(async () => {
+    setLoadingLogbooks(true);
+    const result = await logbookService.getLogbook();
+    if (result.success && result.data) {
+      setLogbooks(result.data);
+    }
+    setLoadingLogbooks(false);
+  }, []);
+
+  useEffect(() => {
+    fetchTupoksi();
+    fetchLogbooks();
+  }, [fetchTupoksi, fetchLogbooks]);
+
   useEffect(() => {
     if (openModal === "true") {
       setShowForm(true);
@@ -91,12 +118,19 @@ export default function LogbookScreen() {
   }, [openModal]);
 
   const [formData, setFormData] = useState({
-    pilihan: "",
-    namaAktivitas: "",
+    tupoksiDdl: "",
+    aktifitas: "",
     tanggal: "",
-    deskripsi: "",
-    bukti: null as any,
+    deskripsiPekerjaan: "",
+    fileDokumenLogbook: null as any,
+    idLogbook: "",
   });
+
+  const [tupoksiList, setTupoksiList] = useState<Tupoksi[]>([]);
+  const [loadingTupoksi, setLoadingTupoksi] = useState(false);
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [logbooks, setLogbooks] = useState<LogbookType[]>([]);
+  const [loadingLogbooks, setLoadingLogbooks] = useState(false);
 
   const [detailActivity, setDetailActivity] = useState<Activity | null>(null);
   const [showPrintPreview, setShowPrintPreview] = useState(false);
@@ -247,7 +281,7 @@ export default function LogbookScreen() {
         type: ["image/*", "application/pdf"],
       });
       if (!result.canceled) {
-        setFormData({ ...formData, bukti: result.assets[0] });
+        setFormData({ ...formData, fileDokumenLogbook: result.assets[0] });
       }
     } catch (err) {
       console.log("Document picker error:", err);
@@ -290,9 +324,29 @@ export default function LogbookScreen() {
 
   const onRefresh = createRefreshHandler(
     setRefreshing,
-    () => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success),
+    async () => {
+      await Promise.all([fetchTupoksi(), fetchLogbooks()]);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    },
     900,
   );
+
+  const convertLogbookToActivity = useCallback((log: LogbookType): Activity => {
+    const statusKey = (log.status as "completed" | "in_progress" | "pending") || "pending";
+    return {
+      id: log.id,
+      time: log.aktifitas || "00:00 - 00:00",
+      statusKey,
+      title: log.aktifitas || "",
+      desc: log.deskripsiPekerjaan || "",
+      iconColor: statusKey === "completed" ? "#4CAF50" : statusKey === "in_progress" ? "#F5A623" : "#999999",
+      category: log.tupoksiDdl,
+      date: log.tanggal,
+      evidence: log.fileDokumenLogbook,
+    };
+  }, []);
+
+  const activities = logbooks.map(convertLogbookToActivity);
 
   return (
     <View style={s.root}>
@@ -363,17 +417,23 @@ export default function LogbookScreen() {
             <Text style={s.selectedDateText}>{selectedDateStr}</Text>
 
             {/* Activity Cards */}
-            {LOGBOOK_ACTIVITIES.map((item) => (
-              <ActivityCard
-                key={item.id}
-                activity={item}
-                isDark={isDark}
-                highContrast={settings.highContrast}
-                onPress={() => setDetailActivity(item)}
-                getStatusText={getStatusText}
-                getStatusColor={getStatusColor}
-              />
-            ))}
+            {loadingLogbooks ? (
+              <Text style={s.selectedDateText}>Loading...</Text>
+            ) : activities.length > 0 ? (
+              activities.map((item) => (
+                <ActivityCard
+                  key={item.id}
+                  activity={item}
+                  isDark={isDark}
+                  highContrast={settings.highContrast}
+                  onPress={() => setDetailActivity(item)}
+                  getStatusText={getStatusText}
+                  getStatusColor={getStatusColor}
+                />
+              ))
+            ) : (
+              <Text style={s.selectedDateText}>No activities found</Text>
+            )}
           </View>
         </ScrollView>
       </Animated.View>
@@ -428,24 +488,25 @@ export default function LogbookScreen() {
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false}>
-              {/* Pilihan */}
+              {/* Pilihan (Tupoksi) */}
               <View style={s.inputCard}>
                 <Text style={s.inputLabel}>{t("choice")}</Text>
                 <TextInput
                   style={s.input}
-                  value={formData.pilihan}
-                  onChangeText={(text) => setFormData({ ...formData, pilihan: text })}
-                  placeholder={t("choice_placeholder")}
+                  value={formData.tupoksiDdl}
+                  onChangeText={(text) => setFormData({ ...formData, tupoksiDdl: text })}
+                  placeholder={loadingTupoksi ? "Loading..." : t("choice_placeholder")}
+                  editable={!loadingTupoksi}
                 />
               </View>
 
-              {/* Nama Aktivitas */}
+              {/* Nama Aktivitas (Aktifitas) */}
               <View style={s.inputCard}>
                 <Text style={s.inputLabel}>{t("activity_name")}</Text>
                 <TextInput
                   style={s.input}
-                  value={formData.namaAktivitas}
-                  onChangeText={(text) => setFormData({ ...formData, namaAktivitas: text })}
+                  value={formData.aktifitas}
+                  onChangeText={(text) => setFormData({ ...formData, aktifitas: text })}
                   placeholder={t("activity_name_placeholder")}
                 />
               </View>
@@ -461,24 +522,26 @@ export default function LogbookScreen() {
                 />
               </View>
 
-              {/* Deskripsi */}
+              {/* Deskripsi (Deskripsi Pekerjaan) */}
               <View style={s.inputCardLarge}>
                 <Text style={s.inputLabel}>{t("work_description")}</Text>
                 <TextInput
                   style={[s.input, s.inputLarge]}
-                  value={formData.deskripsi}
-                  onChangeText={(text) => setFormData({ ...formData, deskripsi: text })}
+                  value={formData.deskripsiPekerjaan}
+                  onChangeText={(text) => setFormData({ ...formData, deskripsiPekerjaan: text })}
                   placeholder={t("work_description_placeholder")}
                   multiline
                   numberOfLines={4}
                 />
               </View>
 
-              {/* Bukti Aktivitas */}
+              {/* Bukti Aktivitas (File Dokumen Logbook) */}
               <View style={s.inputCard}>
                 <Text style={s.inputLabel}>{t("activity_evidence")}</Text>
                 <TouchableOpacity style={s.fileButton} onPress={pickDocument}>
-                  <Text style={s.fileButtonText}>{formData.bukti?.name || t("choose_file")}</Text>
+                  <Text style={s.fileButtonText}>
+                    {formData.fileDokumenLogbook?.name || t("choose_file")}
+                  </Text>
                 </TouchableOpacity>
               </View>
 
@@ -490,11 +553,12 @@ export default function LogbookScreen() {
                   style={s.deleteButton}
                   onPress={() => {
                     setFormData({
-                      pilihan: "",
-                      namaAktivitas: "",
+                      tupoksiDdl: "",
+                      aktifitas: "",
                       tanggal: "",
-                      deskripsi: "",
-                      bukti: null,
+                      deskripsiPekerjaan: "",
+                      fileDokumenLogbook: null,
+                      idLogbook: "",
                     });
                     setShowForm(false);
                   }}
@@ -502,8 +566,55 @@ export default function LogbookScreen() {
                   <Text style={s.deleteButtonText}>{t("delete_log")}</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={s.saveButton} onPress={() => setShowForm(false)}>
-                  <Text style={s.saveButtonText}>{t("save_daily_log")}</Text>
+                <TouchableOpacity
+                  style={[s.saveButton, loadingSubmit && s.saveButtonDisabled]}
+                  onPress={async () => {
+                    if (!formData.tupoksiDdl || !formData.aktifitas || !formData.tanggal) {
+                      Alert.alert("Error", "Please fill in all required fields");
+                      return;
+                    }
+                    
+                    setLoadingSubmit(true);
+                    const nip = await storage.getNip();
+                    if (!nip) {
+                      Alert.alert("Error", "User not logged in");
+                      setLoadingSubmit(false);
+                      return;
+                    }
+
+                    const result = await logbookService.createLogbook({
+                      nip,
+                      tupoksiDdl: formData.tupoksiDdl,
+                      aktifitas: formData.aktifitas,
+                      tanggal: formData.tanggal,
+                      deskripsiPekerjaan: formData.deskripsiPekerjaan,
+                      fileDokumenLogbook: formData.fileDokumenLogbook,
+                      idLogbook: formData.idLogbook || undefined,
+                    });
+
+                    setLoadingSubmit(false);
+
+                    if (result.success) {
+                      Alert.alert("Success", "Logbook saved successfully");
+                      setFormData({
+                        tupoksiDdl: "",
+                        aktifitas: "",
+                        tanggal: "",
+                        deskripsiPekerjaan: "",
+                        fileDokumenLogbook: null,
+                        idLogbook: "",
+                      });
+                      setShowForm(false);
+                      fetchLogbooks();
+                    } else {
+                      Alert.alert("Error", result.message || "Failed to save logbook");
+                    }
+                  }}
+                  disabled={loadingSubmit}
+                >
+                  <Text style={s.saveButtonText}>
+                    {loadingSubmit ? "Saving..." : t("save_daily_log")}
+                  </Text>
                 </TouchableOpacity>
               </View>
 
@@ -777,6 +888,9 @@ const getStyles = (C: ReturnType<typeof getThemeColors>) =>
       backgroundColor: C.orange,
       justifyContent: "center",
       alignItems: "center",
+    },
+    saveButtonDisabled: {
+      opacity: 0.6,
     },
     saveButtonText: {
       fontSize: 14,

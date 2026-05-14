@@ -9,12 +9,16 @@ import * as Print from "expo-print";
 import { useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { BarChart3, Bell, Calendar, Check, FileText, Plus, Printer, X } from "lucide-react-native";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Animated, Dimensions, RefreshControl, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import logbookService from "@/services/logbook";
+import storage from "@/services/storage";
+import auth from "@/services/auth";
+import { Logbook as LogbookType } from "@/services/types";
 
 const { width: W, height: H } = Dimensions.get("window");
 
-const ACTIVITIES: Activity[] = [
+const MOCK_ACTIVITIES: Activity[] = [
   {
     id: 1,
     time: "8.00 - 09.15",
@@ -63,6 +67,35 @@ export default function DashboardScreen() {
   const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [previewActivities, setPreviewActivities] = useState<Activity[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [logbooks, setLogbooks] = useState<LogbookType[]>([]);
+  const [loadingLogbooks, setLoadingLogbooks] = useState(false);
+  const [userName, setUserName] = useState<string>("");
+
+  const fetchLogbooks = useCallback(async () => {
+    setLoadingLogbooks(true);
+    const result = await logbookService.getLogbook();
+    if (result.success && result.data) {
+      setLogbooks(result.data);
+    }
+    setLoadingLogbooks(false);
+  }, []);
+
+  const fetchUserName = useCallback(async () => {
+    const user = await auth.getCurrentUser();
+    if (user?.name) {
+      setUserName(user.name);
+    } else {
+      const storedName = await storage.getUserName();
+      if (storedName) {
+        setUserName(storedName);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchLogbooks();
+    fetchUserName();
+  }, [fetchLogbooks, fetchUserName]);
 
   const [fontsLoaded] = useFonts({
     "Inter-Bold": require("@/assets/fonts/Inter-Bold.ttf"),
@@ -208,9 +241,33 @@ export default function DashboardScreen() {
   };
 
   const onRefresh = useCallback(
-    createRefreshHandler(setRefreshing, () => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)),
-    [],
+    createRefreshHandler(
+      setRefreshing,
+      async () => {
+        await fetchLogbooks();
+        await fetchUserName();
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      },
+    ),
+    [fetchLogbooks, fetchUserName],
   );
+
+  const convertLogbookToActivity = useCallback((log: LogbookType): Activity => {
+    const statusKey = (log.status as "completed" | "in_progress" | "pending") || "pending";
+    return {
+      id: log.id,
+      time: log.aktifitas || "00:00 - 00:00",
+      statusKey,
+      title: log.aktifitas || "",
+      desc: log.deskripsiPekerjaan || "",
+      iconColor: statusKey === "completed" ? "#4CAF50" : statusKey === "in_progress" ? "#F5A623" : "#999999",
+      category: log.tupoksiDdl,
+      date: log.tanggal,
+      evidence: log.fileDokumenLogbook,
+    };
+  }, []);
+
+  const activities = logbooks.map(convertLogbookToActivity);
 
   return (
     <View style={s.root}>
@@ -253,7 +310,7 @@ export default function DashboardScreen() {
               </View>
               <View style={s.greeting}>
                 <Text style={s.greetingText}>{t("greeting_morning")}</Text>
-                <Text style={s.userName}>RAJAMUDA ASDI</Text>
+                <Text style={s.userName}>{userName || "User"}</Text>
               </View>
             </View>
 
@@ -304,7 +361,7 @@ export default function DashboardScreen() {
                       style={[s.printBtn, selectedActivities.length === 0 && s.printBtnDisabled]}
                       onPress={() => {
                         if (selectedActivities.length > 0) {
-                          const toPrint = ACTIVITIES.filter((a) => selectedActivities.includes(a.id));
+                          const toPrint = activities.filter((a) => selectedActivities.includes(a.id));
                           openPrintPreview(toPrint);
                         }
                       }}
@@ -326,7 +383,10 @@ export default function DashboardScreen() {
             <Text style={s.sectionDate}>{today}</Text>
 
             {/* Activity Cards */}
-            {ACTIVITIES.map((item) => (
+            {loadingLogbooks ? (
+              <Text style={s.sectionDate}>Loading...</Text>
+            ) : activities.length > 0 ? (
+              activities.map((item) => (
               <View
                 key={item.id}
                 style={[s.cardWrapper, selectMode && selectedActivities.includes(item.id) && s.cardWrapperSelected]}
@@ -357,7 +417,10 @@ export default function DashboardScreen() {
                   </View>
                 )}
               </View>
-            ))}
+            ))
+            ) : (
+              <Text style={s.sectionDate}>No activities found</Text>
+            )}
 
             {/* Bottom spacing for tab bar */}
             <View style={{ height: 100 }} />

@@ -4,11 +4,15 @@ import { useFadeInOnFocus } from "@/hooks/useFadeInOnFocus";
 import { useFonts } from "expo-font";
 import { useRouter } from "expo-router";
 import { ArrowLeft, Calendar, Clock, FileText, TrendingUp } from "lucide-react-native";
-import React, { useState } from "react";
-import { Animated, Dimensions, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useState, useCallback } from "react";
+import { Animated, Dimensions, RefreshControl, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { BarChart, LineChart } from "react-native-gifted-charts";
+import logbookService from "@/services/logbook";
+import { Statistics, Logbook } from "@/services/types";
 
 const { width: W } = Dimensions.get("window");
+
+const DAY_LABELS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
 export default function StatistikScreen() {
   const router = useRouter();
@@ -18,6 +22,11 @@ export default function StatistikScreen() {
   const isDark = settings.theme === "dark";
   const C = getThemeColors(isDark, settings.highContrast);
   const s = getStyles(C, W);
+  
+  const [statistics, setStatistics] = useState<Statistics | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
   useFonts({
     "Inter-Bold": require("@/assets/fonts/Inter-Bold.ttf"),
     "Inter-ExtraBold": require("@/assets/fonts/Inter-ExtraBold.ttf"),
@@ -25,51 +34,69 @@ export default function StatistikScreen() {
     "Magra-Regular": require("@/assets/fonts/Magra-Regular.ttf"),
   });
 
-  const BAR_DATA = [
-    { value: 4, label: t("mon"), frontColor: C.orange },
-    { value: 6, label: t("tue"), frontColor: C.orange },
-    { value: 3, label: t("wed"), frontColor: C.orange },
-    { value: 8, label: t("thu"), frontColor: C.orange },
-    { value: 5, label: t("fri"), frontColor: C.orange },
-    { value: 2, label: t("sat"), frontColor: C.orange },
+  const fetchStatistics = useCallback(async () => {
+    setLoading(true);
+    const result = await logbookService.getLogbook();
+    if (result.success && result.data) {
+      const stats = logbookService.calculateStatistics(result.data);
+      setStatistics(stats);
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    fetchStatistics();
+  }, [fetchStatistics]);
+
+  const BAR_DATA = statistics?.weeklyData.map((d: { day: string; count: number }, i: number) => ({
+    value: d.count,
+    label: t(DAY_LABELS[i] as any),
+    frontColor: C.orange,
+  })) || [
+    { value: 0, label: t("mon"), frontColor: C.orange },
+    { value: 0, label: t("tue"), frontColor: C.orange },
+    { value: 0, label: t("wed"), frontColor: C.orange },
+    { value: 0, label: t("thu"), frontColor: C.orange },
+    { value: 0, label: t("fri"), frontColor: C.orange },
+    { value: 0, label: t("sat"), frontColor: C.orange },
     { value: 0, label: t("sun"), frontColor: C.orange },
   ];
 
-  const LINE_DATA = [
-    { value: 4, label: t("mon") },
-    { value: 6, label: t("tue") },
-    { value: 3, label: t("wed") },
-    { value: 8, label: t("thu") },
-    { value: 5, label: t("fri") },
-    { value: 2, label: t("sat") },
-    { value: 0, label: t("sun") },
+  const LINE_DATA = statistics?.weeklyData.map((d: { day: string; count: number }) => ({ value: d.count })) || [
+    { value: 0 },
+    { value: 0 },
+    { value: 0 },
+    { value: 0 },
+    { value: 0 },
+    { value: 0 },
+    { value: 0 },
   ];
 
   const STAT_CARDS = [
     {
       icon: FileText,
-      value: "156",
+      value: loading ? "..." : String(statistics?.totalLogbook || 0),
       label: t("total_logbook"),
       bg: "#FFF4E5",
       iconColor: C.orange,
     },
     {
       icon: Calendar,
-      value: "28",
+      value: loading ? "..." : String(statistics?.thisMonth || 0),
       label: t("this_month"),
       bg: "#F3E8FF",
       iconColor: "#8B5CF6",
     },
     {
       icon: TrendingUp,
-      value: "4.2",
+      value: loading ? "..." : String(statistics?.avgPerDay || 0),
       label: t("avg_per_day"),
       bg: "#DCFCE7",
       iconColor: "#22C55E",
     },
     {
       icon: Clock,
-      value: "312",
+      value: loading ? "..." : String(statistics?.totalHours || 0),
       label: t("total_hours"),
       bg: "#E0E7FF",
       iconColor: "#6366F1",
@@ -86,7 +113,21 @@ export default function StatistikScreen() {
           transform: [{ translateY: slideAnim }],
         }}
       >
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={async () => {
+                setRefreshing(true);
+                await fetchStatistics();
+                setRefreshing(false);
+              }}
+              tintColor={C.orange}
+              progressViewOffset={110}
+            />
+          }
+        >
           {/* Header */}
           <View style={s.header}>
             <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
@@ -128,13 +169,13 @@ export default function StatistikScreen() {
                 </TouchableOpacity>
               </View>
             </View>
-            <View style={{ marginLeft: -10, marginRight: -10 }}>
+            <View style={{ marginLeft: -10, marginRight: -10, overflow: "hidden" }}>
               <BarChart
                 data={BAR_DATA}
                 barWidth={W * 0.07}
                 spacing={W * 0.03}
                 height={160}
-                maxValue={8}
+                maxValue={Math.max(8, ...BAR_DATA.map(d => d.value))}
                 noOfSections={4}
                 yAxisThickness={0}
                 xAxisThickness={1}
@@ -145,6 +186,8 @@ export default function StatistikScreen() {
                 rulesColor="#E0E0E0"
                 showYAxisIndices={false}
                 isAnimated
+                hideRules
+                adjustToWidth={false}
               />
             </View>
           </View>
@@ -152,11 +195,11 @@ export default function StatistikScreen() {
           {/* Line Chart */}
           <View style={[s.chartCard, { overflow: "hidden" }]}>
             <Text style={s.chartTitle}>{t("productivity_trend")}</Text>
-            <View style={{ marginLeft: -10, marginRight: -10 }}>
+            <View style={{ marginLeft: -10, marginRight: -10, overflow: "hidden" }}>
               <LineChart
                 data={LINE_DATA}
                 height={160}
-                maxValue={8}
+                maxValue={Math.max(8, ...LINE_DATA.map(d => d.value))}
                 noOfSections={4}
                 color={C.orange}
                 dataPointsColor={C.orange}
@@ -171,6 +214,16 @@ export default function StatistikScreen() {
                 rulesColor="#E0E0E0"
                 showYAxisIndices={false}
                 isAnimated
+                hideRules
+                adjustToWidth={false}
+                dataPointsHeight={4}
+                dataPointsWidth={4}
+                curved
+                areaChart
+                startFillColor={C.orange}
+                endFillColor={C.orange}
+                startOpacity={0.3}
+                endOpacity={0.05}
               />
             </View>
           </View>

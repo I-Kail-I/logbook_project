@@ -20,7 +20,10 @@ import {
     X,
     Zap,
 } from "lucide-react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Alert } from "react-native";
+import storage from "@/services/storage";
+import auth from "@/services/auth";
 import {
     Animated,
     Modal,
@@ -83,9 +86,75 @@ export default function SettingsScreen() {
     confirm: "",
   });
 
+  useEffect(() => {
+    loadProfileData();
+  }, []);
+
+  const loadProfileData = async () => {
+    const nip = await storage.getNip();
+    const name = await storage.getUserName();
+    const email = await storage.getProfileEmail();
+    const phone = await storage.getProfilePhone();
+    
+    setProfileData({
+      nama: name || "",
+      email: email || "",
+      nip: nip || "",
+      telepon: phone || "",
+    });
+  };
+
+  const handleSaveProfile = async () => {
+    if (profileData.nama) {
+      await storage.saveUserName(profileData.nama);
+    }
+    if (profileData.email) {
+      await storage.saveProfileEmail(profileData.email);
+    }
+    if (profileData.telepon) {
+      await storage.saveProfilePhone(profileData.telepon);
+    }
+    Alert.alert("Success", "Profile saved locally");
+    setShowProfileModal(false);
+  };
+
+  const handleChangePassword = async () => {
+    const savedPassword = await storage.getSavedPassword();
+    
+    if (!passwordData.current) {
+      Alert.alert("Error", "Please enter current password");
+      return;
+    }
+    
+    if (!passwordData.new) {
+      Alert.alert("Error", "Please enter new password");
+      return;
+    }
+    
+    if (passwordData.new !== passwordData.confirm) {
+      Alert.alert("Error", "New passwords do not match");
+      return;
+    }
+    
+    if (savedPassword && passwordData.current !== savedPassword) {
+      Alert.alert("Error", "Current password is incorrect");
+      return;
+    }
+    
+    await storage.savePassword(passwordData.new);
+    setPasswordData({ current: "", new: "", confirm: "" });
+    Alert.alert("Success", "Password saved locally");
+    setShowPasswordModal(false);
+  };
+
+  const handleLogout = async () => {
+    await auth.logout();
+    router.replace("/");
+  };
+
   const languageLabelMap: Record<(typeof settings)["language"], string> = {
-    id: t("indonesia"),
-    en: t("english"),
+    id: "indonesia",
+    en: "english",
     ar: "العربية",
     zh: "中文",
   };
@@ -256,7 +325,7 @@ export default function SettingsScreen() {
           </View>
 
           {/* Logout Button */}
-          <TouchableOpacity style={s.logoutButton}>
+          <TouchableOpacity style={s.logoutButton} onPress={handleLogout}>
             <LogOut size={18} color={C.red} />
             <Text style={s.logoutText}>{t("logout")}</Text>
           </TouchableOpacity>
@@ -329,7 +398,7 @@ export default function SettingsScreen() {
                 />
               </View>
 
-              <TouchableOpacity style={s.saveButton} onPress={() => setShowProfileModal(false)}>
+              <TouchableOpacity style={s.saveButton} onPress={handleSaveProfile}>
                 <Text style={s.saveButtonText}>{t("save")}</Text>
               </TouchableOpacity>
 
@@ -392,7 +461,7 @@ export default function SettingsScreen() {
                 />
               </View>
 
-              <TouchableOpacity style={s.saveButton} onPress={() => setShowPasswordModal(false)}>
+              <TouchableOpacity style={s.saveButton} onPress={handleChangePassword}>
                 <Text style={s.saveButtonText}>{t("save")}</Text>
               </TouchableOpacity>
 

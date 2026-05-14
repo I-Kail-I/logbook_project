@@ -18,7 +18,9 @@ import {
     TouchableOpacity,
     TouchableWithoutFeedback,
     View,
+    Alert,
 } from "react-native";
+import auth from "@/services/auth";
 
 //  Screen Dimensions
 const { width: W, height: H } = Dimensions.get("window");
@@ -79,6 +81,7 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [nipFocused, setNipFocused] = useState(false);
   const [pwFocused, setPwFocused] = useState(false);
+  const [error, setError] = useState("");
 
   const logoY = useRef(new Animated.Value(LOGO_Y_START)).current;
   const logoScale = useRef(new Animated.Value(0.8)).current;
@@ -157,20 +160,31 @@ export default function LoginScreen() {
 
   //  Login Handler
   const handleLogin = async () => {
-    if (!nip.trim() || !password.trim()) return;
+    if (!nip.trim()) {
+      setError("NIP/NIDN is required");
+      return;
+    }
+    if (!password.trim()) {
+      setError("Password is required");
+      return;
+    }
+    
+    setError("");
     setLoading(true);
     try {
-      // TODO: Replace with your real API call:
-      // const { data } = await axios.post('/api/auth/login', { nip, password });
-      // await AsyncStorage.setItem('token', data.token);
-      await new Promise((r) => setTimeout(r, 1000));
-      if (nip.trim().toLowerCase() === "123" && password.trim() === "admin") {
-        router.replace("/(admin)");
-        return;
+      const result = await auth.login({
+        username: nip.trim(),
+        password: password.trim(),
+      });
+
+      if (result.success) {
+        router.replace("/(tabs)");
+      } else {
+        setError(result.message || "Invalid credentials");
       }
-      router.replace("/(tabs)");
     } catch (err) {
       console.error(err);
+      setError("An unexpected error occurred");
     } finally {
       setLoading(false);
     }
@@ -232,11 +246,14 @@ export default function LoginScreen() {
               {/* Password Field */}
               <Animated.View style={[s.fieldWrap, { opacity: formOp }]}>
                 <Text style={s.fieldLabel}>Password</Text>
-                <View style={[s.inputBox, pwFocused && s.inputBoxFocused]}>
+                <View style={[s.inputBox, pwFocused && s.inputBoxFocused, error && s.inputBoxError]}>
                   <TextInput
                     style={[s.textInput, { flex: 1 }]}
                     value={password}
-                    onChangeText={setPassword}
+                    onChangeText={(text) => {
+                      setPassword(text);
+                      if (error) setError("");
+                    }}
                     placeholder={t("enter_password")}
                     placeholderTextColor={C.inputPlaceholder}
                     secureTextEntry={secureText}
@@ -254,6 +271,13 @@ export default function LoginScreen() {
                   </TouchableOpacity>
                 </View>
               </Animated.View>
+
+              {/* Error Message */}
+              {error ? (
+                <Animated.View style={{ opacity: formOp }}>
+                  <Text style={s.errorText}>{error}</Text>
+                </Animated.View>
+              ) : null}
 
               {/* Login Button */}
               <Animated.View style={[s.btnWrap, { opacity: formOp }]}>
@@ -418,6 +442,18 @@ const s = StyleSheet.create({
   showHideText: {
     fontSize: 12,
     color: C.showHide,
+    fontWeight: "500",
+  },
+  inputBoxError: {
+    borderColor: "#EF4444",
+    backgroundColor: "#FEF2F2",
+  },
+  errorText: {
+    color: "#EF4444",
+    fontSize: 12,
+    marginTop: 8,
+    marginBottom: 4,
+    textAlign: "center",
     fontWeight: "500",
   },
 
