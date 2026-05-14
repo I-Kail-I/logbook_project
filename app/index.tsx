@@ -83,6 +83,15 @@ export default function LoginScreen() {
   const [pwFocused, setPwFocused] = useState(false);
   const [error, setError] = useState("");
 
+  // Auto-login check
+  useEffect(() => {
+    auth.isAuthenticated().then((loggedIn) => {
+      if (loggedIn) {
+        router.replace("/(tabs)");
+      }
+    });
+  }, [router]);
+
   const logoY = useRef(new Animated.Value(LOGO_Y_START)).current;
   const logoScale = useRef(new Animated.Value(0.8)).current;
   const cardY = useRef(new Animated.Value(CARD_HEIGHT + 60)).current;

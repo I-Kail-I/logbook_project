@@ -14,6 +14,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { Alert } from "react-native";
 import logbookService from "@/services/logbook";
 import storage from "@/services/storage";
+import notificationService from "@/services/notifications";
 import { Tupoksi, Logbook as LogbookType } from "@/services/types";
 import {
   Animated,
@@ -32,40 +33,6 @@ import {
 const { width: W } = Dimensions.get("window");
 
 const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
-
-const LOGBOOK_ACTIVITIES: Activity[] = [
-  {
-    id: 1,
-    time: "8.00 - 09.15",
-    statusKey: "completed",
-    title: "Dokumen DOKSLI",
-    desc: "Penyusunan dokumen DOKSLI untuk proyek A.",
-    iconColor: "#F5A623",
-    category: "Dokumenasi",
-    date: "2026-02-08",
-    evidence: "dokumen_doksli.pdf",
-  },
-  {
-    id: 2,
-    time: "9.30 - 11.00",
-    statusKey: "completed",
-    title: "Meeting Harian",
-    desc: "Diskusi progress dengan tim development.",
-    iconColor: "#4CAF50",
-    category: "Meeting",
-    date: "2026-02-08",
-  },
-  {
-    id: 3,
-    time: "13.00 - 15.00",
-    statusKey: "in_progress",
-    title: "Review Kode",
-    desc: "Review dan testing fitur autentikasi.",
-    iconColor: "#8B5CF6",
-    category: "Development",
-    date: "2026-02-08",
-  },
-];
 
 export default function LogbookScreen() {
   const router = useRouter();
@@ -365,8 +332,10 @@ export default function LogbookScreen() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              tintColor={C.orange}
-              progressViewOffset={110}
+              tintColor={isDark ? C.orange : "#fff"}
+              colors={[isDark ? C.orange : "#F5A623"]}
+              progressBackgroundColor={isDark ? undefined : "#fff"}
+              progressViewOffset={180}
             />
           }
           showsVerticalScrollIndicator={false}
@@ -487,7 +456,11 @@ export default function LogbookScreen() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ paddingBottom: 120 }}
+            >
               {/* Pilihan (Tupoksi) */}
               <View style={s.inputCard}>
                 <Text style={s.inputLabel}>{t("choice")}</Text>
@@ -595,7 +568,11 @@ export default function LogbookScreen() {
                     setLoadingSubmit(false);
 
                     if (result.success) {
-                      Alert.alert("Success", "Logbook saved successfully");
+                      if (formData.idLogbook) {
+                        await notificationService.scheduleLogbookSaved();
+                      } else {
+                        await notificationService.scheduleLogbookAdded();
+                      }
                       setFormData({
                         tupoksiDdl: "",
                         aktifitas: "",

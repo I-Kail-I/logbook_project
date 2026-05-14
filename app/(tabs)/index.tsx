@@ -10,48 +10,14 @@ import { useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { BarChart3, Bell, Calendar, Check, FileText, Plus, Printer, X } from "lucide-react-native";
 import React, { useCallback, useEffect, useState } from "react";
-import { Animated, Dimensions, RefreshControl, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Animated, Dimensions, Image, RefreshControl, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import logbookService from "@/services/logbook";
 import storage from "@/services/storage";
 import auth from "@/services/auth";
+import notificationService from "@/services/notifications";
 import { Logbook as LogbookType } from "@/services/types";
 
 const { width: W, height: H } = Dimensions.get("window");
-
-const MOCK_ACTIVITIES: Activity[] = [
-  {
-    id: 1,
-    time: "8.00 - 09.15",
-    statusKey: "completed",
-    title: "Dokumen DOKSLI Asli",
-    desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in euismod augue. Proin vel justo nec metus facilisis eleifend.",
-    iconColor: "#F5A623",
-    category: "Dokumenasi",
-    date: "2026-02-08",
-    evidence: "dokumen_doksli.pdf",
-  },
-  {
-    id: 2,
-    time: "9.30 - 11.00",
-    statusKey: "completed",
-    title: "Meeting Proyek A",
-    desc: "Diskusi progress proyek dengan tim teknis dan stakeholder terkait pengembangan fitur baru.",
-    iconColor: "#4CAF50",
-    category: "Meeting",
-    date: "2026-02-08",
-    evidence: "meeting_notes.pdf",
-  },
-  {
-    id: 3,
-    time: "13.00 - 15.00",
-    statusKey: "in_progress",
-    title: "Review Kode Backend",
-    desc: "Review dan testing API endpoint untuk modul autentikasi dan autorisasi.",
-    iconColor: "#8B5CF6",
-    category: "Development",
-    date: "2026-02-08",
-  },
-];
 
 export default function DashboardScreen() {
   const router = useRouter();
@@ -70,6 +36,13 @@ export default function DashboardScreen() {
   const [logbooks, setLogbooks] = useState<LogbookType[]>([]);
   const [loadingLogbooks, setLoadingLogbooks] = useState(false);
   const [userName, setUserName] = useState<string>("");
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const fetchUnreadCount = useCallback(async () => {
+    const count = await notificationService.getUnreadCount();
+    setUnreadCount(count);
+  }, []);
 
   const fetchLogbooks = useCallback(async () => {
     setLoadingLogbooks(true);
@@ -90,12 +63,15 @@ export default function DashboardScreen() {
         setUserName(storedName);
       }
     }
+    const pic = await storage.getProfilePicture();
+    setProfilePicture(pic);
   }, []);
 
   useEffect(() => {
     fetchLogbooks();
     fetchUserName();
-  }, [fetchLogbooks, fetchUserName]);
+    fetchUnreadCount();
+  }, [fetchLogbooks, fetchUserName, fetchUnreadCount]);
 
   const [fontsLoaded] = useFonts({
     "Inter-Bold": require("@/assets/fonts/Inter-Bold.ttf"),
@@ -246,10 +222,11 @@ export default function DashboardScreen() {
       async () => {
         await fetchLogbooks();
         await fetchUserName();
+        await fetchUnreadCount();
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       },
     ),
-    [fetchLogbooks, fetchUserName],
+    [fetchLogbooks, fetchUserName, fetchUnreadCount],
   );
 
   const convertLogbookToActivity = useCallback((log: LogbookType): Activity => {
@@ -281,8 +258,10 @@ export default function DashboardScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={C.orange}
-            progressViewOffset={110}
+            tintColor={isDark ? C.orange : "#fff"}
+            colors={[isDark ? C.orange : "#F5A623"]}
+            progressBackgroundColor={isDark ? undefined : "#fff"}
+            progressViewOffset={180}
           />
         }
       >
@@ -297,16 +276,20 @@ export default function DashboardScreen() {
               </View>
               <TouchableOpacity style={s.bellBtn} onPress={() => router.push("/(tabs)/notifications")}>
                 <Bell size={20} color={C.white} />
-                <View style={s.bellBadge} />
+                {unreadCount > 0 && <View style={s.bellBadge} />}
               </TouchableOpacity>
             </View>
 
             {/* User Profile */}
             <View style={s.userRow}>
               <View style={s.avatar}>
-                <View style={s.avatarInner}>
-                  <Text style={s.avatarText}>R</Text>
-                </View>
+                {profilePicture ? (
+                  <Image source={{ uri: profilePicture }} style={s.avatarImage} />
+                ) : (
+                  <View style={s.avatarInner}>
+                    <Text style={s.avatarText}>{userName ? userName[0] : "U"}</Text>
+                  </View>
+                )}
               </View>
               <View style={s.greeting}>
                 <Text style={s.greetingText}>{t("greeting_morning")}</Text>
@@ -532,6 +515,11 @@ const getStyles = (C: ReturnType<typeof getThemeColors>) =>
       backgroundColor: C.orangeLight,
       justifyContent: "center",
       alignItems: "center",
+    },
+    avatarImage: {
+      width: 50,
+      height: 50,
+      borderRadius: 12,
     },
     avatarText: {
       fontSize: 24,

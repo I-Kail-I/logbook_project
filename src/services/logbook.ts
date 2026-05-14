@@ -29,7 +29,7 @@ export const logbook = {
     } catch (error: any) {
       return {
         success: false,
-        message: error.response?.data?.message || "Failed to fetch logbooks",
+        message: "Failed to fetch logbooks",
       };
     }
   },
@@ -50,7 +50,7 @@ export const logbook = {
     } catch (error: any) {
       return {
         success: false,
-        message: error.response?.data?.message || "Failed to fetch tupoksi",
+        message: "Failed to fetch tupoksi",
       };
     }
   },

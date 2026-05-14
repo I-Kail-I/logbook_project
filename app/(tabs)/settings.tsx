@@ -21,7 +21,8 @@ import {
     Zap,
 } from "lucide-react-native";
 import React, { useState, useEffect } from "react";
-import { Alert } from "react-native";
+import { Alert, Image, Platform } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import storage from "@/services/storage";
 import auth from "@/services/auth";
 import {
@@ -80,6 +81,8 @@ export default function SettingsScreen() {
     telepon: "",
   });
 
+  const [profilePictureUri, setProfilePictureUri] = useState<string | null>(null);
+
   const [passwordData, setPasswordData] = useState({
     current: "",
     new: "",
@@ -95,6 +98,7 @@ export default function SettingsScreen() {
     const name = await storage.getUserName();
     const email = await storage.getProfileEmail();
     const phone = await storage.getProfilePhone();
+    const pic = await storage.getProfilePicture();
     
     setProfileData({
       nama: name || "",
@@ -102,6 +106,19 @@ export default function SettingsScreen() {
       nip: nip || "",
       telepon: phone || "",
     });
+    setProfilePictureUri(pic);
+  };
+
+  const pickProfilePicture = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+    if (!result.canceled && result.assets[0]) {
+      setProfilePictureUri(result.assets[0].uri);
+    }
   };
 
   const handleSaveProfile = async () => {
@@ -113,6 +130,9 @@ export default function SettingsScreen() {
     }
     if (profileData.telepon) {
       await storage.saveProfilePhone(profileData.telepon);
+    }
+    if (profilePictureUri) {
+      await storage.saveProfilePicture(profilePictureUri);
     }
     Alert.alert("Success", "Profile saved locally");
     setShowProfileModal(false);
@@ -350,7 +370,27 @@ export default function SettingsScreen() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ paddingBottom: 120 }}
+            >
+              {/* Profile Picture */}
+              <View style={s.profilePicSection}>
+                <TouchableOpacity style={s.profilePicContainer} onPress={pickProfilePicture}>
+                  {profilePictureUri ? (
+                    <Image source={{ uri: profilePictureUri }} style={s.profilePic} />
+                  ) : (
+                    <View style={s.profilePicPlaceholder}>
+                      <Text style={s.profilePicPlaceholderText}>
+                        {profileData.nama ? profileData.nama[0].toUpperCase() : "U"}
+                      </Text>
+                    </View>
+                  )}
+                  <Text style={s.profilePicEditText}>{t("change_photo")}</Text>
+                </TouchableOpacity>
+              </View>
+
               <View style={s.inputGroup}>
                 <Text style={s.inputLabel}>{t("full_name")}</Text>
                 <TextInput
@@ -424,7 +464,7 @@ export default function SettingsScreen() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 120 }}>
               <View style={s.inputGroup}>
                 <Text style={s.inputLabel}>{t("current_password")}</Text>
                 <TextInput
@@ -838,6 +878,39 @@ const getStyles = (
     },
     languageTextActive: {
       color: C.orange,
+    },
+
+    // Profile Picture
+    profilePicSection: {
+      alignItems: "center",
+      marginBottom: 20,
+    },
+    profilePicContainer: {
+      alignItems: "center",
+    },
+    profilePic: {
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+    },
+    profilePicPlaceholder: {
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      backgroundColor: C.orange,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    profilePicPlaceholderText: {
+      fontSize: 32,
+      fontFamily: boldFont,
+      color: C.white,
+    },
+    profilePicEditText: {
+      fontSize: scaleFont(12, m),
+      fontFamily: regularFont,
+      color: C.orange,
+      marginTop: 8,
     },
   });
 };

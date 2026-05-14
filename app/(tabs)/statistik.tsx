@@ -123,7 +123,9 @@ export default function StatistikScreen() {
                 await fetchStatistics();
                 setRefreshing(false);
               }}
-              tintColor={C.orange}
+              tintColor={isDark ? C.orange : "#fff"}
+              colors={[isDark ? C.orange : "#F5A623"]}
+              progressBackgroundColor={isDark ? undefined : "#fff"}
               progressViewOffset={110}
             />
           }

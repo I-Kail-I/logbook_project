@@ -1,14 +1,36 @@
 import api, { API_HEADERS } from "./api";
 import { LoginResponse } from "./types";
 import storage from "./storage";
+import notificationService from "./notifications";
 
 interface LoginParams {
   username: string;
   password: string;
 }
 
+const TEST_ACCOUNTS = [
+  { username: "1234567890", password: "password123", nip: "1234567890", name: "Test Employee" },
+  { username: "admin", password: "admin", nip: "admin", name: "Admin User" },
+  { username: "demo", password: "demo", nip: "demo", name: "Demo User" },
+];
+
 export const auth = {
   async login({ username, password }: LoginParams): Promise<LoginResponse> {
+    // Check for test accounts first
+    const testAccount = TEST_ACCOUNTS.find(
+      (acc) => acc.username === username && acc.password === password
+    );
+
+    if (testAccount) {
+      await storage.saveNip(testAccount.nip);
+      await storage.saveUserName(testAccount.name);
+      return {
+        success: true,
+        data: { nip: testAccount.nip, nama: testAccount.name },
+      };
+    }
+
+    // Try API login
     try {
       const formData = new FormData();
       formData.append("username", username);
@@ -39,6 +61,7 @@ export const auth = {
 
   async logout(): Promise<void> {
     await storage.clearAll();
+    await notificationService.clearAll();
   },
 
   async getCurrentUser(): Promise<{ nip: string; name: string | null } | null> {
