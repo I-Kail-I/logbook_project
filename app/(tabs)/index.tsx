@@ -1,4 +1,4 @@
-import { ActivityCard, ActivityDetailModal, PrintPreviewModal, type Activity } from "@/components";
+import { ActivityCard, ActivityDetailModal, PrintPreviewModal, ActionCard, type Activity, type ActionCardData } from "@/components";
 import { getThemeColors } from "@/constants/theme";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useFadeInOnFocus } from "@/hooks/useFadeInOnFocus";
@@ -299,33 +299,33 @@ export default function DashboardScreen() {
 
             {/* Action Cards */}
             <View style={s.actionCards}>
-              <TouchableOpacity
-                style={s.actionCard}
+              <ActionCard
+                data={{
+                  title: t("add_log"),
+                  subtitle: t("add_log_sub"),
+                  icon: Plus,
+                  iconBg: C.orangeLight,
+                  iconColor: C.orangeDark,
+                }}
+                isDark={isDark}
                 onPress={() =>
                   router.push({
                     pathname: "/(tabs)/logbook",
                     params: { openModal: "true" },
                   })
                 }
-              >
-                <View style={[s.actionIcon, { backgroundColor: C.orangeLight }]}>
-                  <Plus size={24} color={C.orangeDark} />
-                </View>
-                <View>
-                  <Text style={s.actionTitle}>{t("add_log")}</Text>
-                  <Text style={s.actionSubtitle}>{t("add_log_sub")}</Text>
-                </View>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={s.actionCard} onPress={() => router.push("/(tabs)/statistik")}>
-                <View style={[s.actionIcon, { backgroundColor: "#E8D5F7" }]}>
-                  <BarChart3 size={24} color="#8B5CF6" />
-                </View>
-                <View>
-                  <Text style={s.actionTitle}>{t("statistics")}</Text>
-                  <Text style={s.actionSubtitle}>{t("statistics_sub")}</Text>
-                </View>
-              </TouchableOpacity>
+              />
+              <ActionCard
+                data={{
+                  title: t("statistics"),
+                  subtitle: t("statistics_sub"),
+                  icon: BarChart3,
+                  iconBg: "#E8D5F7",
+                  iconColor: "#8B5CF6",
+                }}
+                isDark={isDark}
+                onPress={() => router.push("/(tabs)/statistik")}
+              />
             </View>
           </View>
 
@@ -558,38 +558,6 @@ const getStyles = (C: ReturnType<typeof getThemeColors>) =>
     actionCards: {
       flexDirection: "row",
       gap: 12,
-    },
-    actionCard: {
-      flex: 1,
-      backgroundColor: C.white,
-      borderRadius: 16,
-      padding: 16,
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 12,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 8,
-      elevation: 4,
-    },
-    actionIcon: {
-      width: 44,
-      height: 44,
-      borderRadius: 12,
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    actionTitle: {
-      fontSize: 14,
-      fontFamily: "Inter-Bold",
-      color: "#1A1A1A",
-      marginBottom: 2,
-    },
-    actionSubtitle: {
-      fontSize: 11,
-      color: "#666666",
-      fontFamily: "Magra-Regular",
     },
 
     // Content

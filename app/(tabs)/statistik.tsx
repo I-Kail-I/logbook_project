@@ -3,6 +3,7 @@ import { useSettings } from "@/contexts/SettingsContext";
 import { useFadeInOnFocus } from "@/hooks/useFadeInOnFocus";
 import { useFonts } from "expo-font";
 import { useRouter } from "expo-router";
+import { StatCard, type StatCardData } from "@/components";
 import { ArrowLeft, Calendar, Clock, FileText, TrendingUp } from "lucide-react-native";
 import React, { useEffect, useState, useCallback } from "react";
 import { Animated, Dimensions, RefreshControl, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -72,34 +73,42 @@ export default function StatistikScreen() {
     { value: 0 },
   ];
 
-  const STAT_CARDS = [
+  const statCards: { data: StatCardData; icon: React.ElementType }[] = [
     {
       icon: FileText,
-      value: loading ? "..." : String(statistics?.totalLogbook || 0),
-      label: t("total_logbook"),
-      bg: "#FFF4E5",
-      iconColor: C.orange,
+      data: {
+        value: loading ? "..." : String(statistics?.totalLogbook ?? "0"),
+        label: t("total_logbook"),
+        bg: "#FFF4E5",
+        iconColor: C.orange,
+      },
     },
     {
       icon: Calendar,
-      value: loading ? "..." : String(statistics?.thisMonth || 0),
-      label: t("this_month"),
-      bg: "#F3E8FF",
-      iconColor: "#8B5CF6",
+      data: {
+        value: loading ? "..." : String(statistics?.thisMonth ?? "0"),
+        label: t("this_month"),
+        bg: "#F3E8FF",
+        iconColor: "#8B5CF6",
+      },
     },
     {
       icon: TrendingUp,
-      value: loading ? "..." : String(statistics?.avgPerDay || 0),
-      label: t("avg_per_day"),
-      bg: "#DCFCE7",
-      iconColor: "#22C55E",
+      data: {
+        value: loading ? "..." : String(statistics?.avgPerDay ?? "0"),
+        label: t("avg_per_day"),
+        bg: "#DCFCE7",
+        iconColor: "#22C55E",
+      },
     },
     {
       icon: Clock,
-      value: loading ? "..." : String(statistics?.totalHours || 0),
-      label: t("total_hours"),
-      bg: "#E0E7FF",
-      iconColor: "#6366F1",
+      data: {
+        value: loading ? "..." : String(statistics?.totalHours ?? "0"),
+        label: t("total_hours"),
+        bg: "#E0E7FF",
+        iconColor: "#6366F1",
+      },
     },
   ];
 
@@ -141,14 +150,8 @@ export default function StatistikScreen() {
 
           {/* Stats Grid */}
           <View style={s.statsGrid}>
-            {STAT_CARDS.map((item, i) => (
-              <View key={i} style={s.statCard}>
-                <View style={[s.statIconWrap, { backgroundColor: item.bg }]}>
-                  <item.icon size={20} color={item.iconColor} />
-                </View>
-                <Text style={s.statValue}>{item.value}</Text>
-                <Text style={s.statLabel}>{item.label}</Text>
-              </View>
+            {statCards.map((item, i) => (
+              <StatCard key={i} data={item.data} icon={item.icon} isDark={isDark} highContrast={settings.highContrast} />
             ))}
           </View>
 
@@ -273,32 +276,7 @@ const getStyles = (C: ReturnType<typeof getThemeColors>, W: number) =>
       marginTop: 16,
       justifyContent: "space-between",
     },
-    statCard: {
-      backgroundColor: C.cardBg,
-      borderRadius: 16,
-      padding: 14,
-      width: (W - 56) / 2,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.05,
-      shadowRadius: 4,
-      elevation: 2,
-    },
-    statIconWrap: {
-      width: 36,
-      height: 36,
-      borderRadius: 10,
-      justifyContent: "center",
-      alignItems: "center",
-      marginBottom: 10,
-    },
-    statValue: { fontSize: 22, fontFamily: "Inter-ExtraBold", color: C.textDark },
-    statLabel: {
-      fontSize: 11,
-      fontFamily: "Magra-Regular",
-      color: C.textGray,
-      marginTop: 2,
-    },
+
     chartCard: {
       backgroundColor: C.cardBg,
       marginHorizontal: 16,

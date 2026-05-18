@@ -1,7 +1,28 @@
-import * as Notifications from "expo-notifications";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const HISTORY_KEY = "@notification_history";
+
+let Notifications: typeof import("expo-notifications") | null = null;
+
+async function loadNotifications() {
+  if (!Notifications) {
+    try {
+      Notifications = await import("expo-notifications");
+      Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldShowAlert: true,
+          shouldPlaySound: true,
+          shouldSetBadge: true,
+          shouldShowBanner: true,
+          shouldShowList: true,
+        }),
+      });
+    } catch {
+      console.log("expo-notifications not available in this environment");
+    }
+  }
+  return Notifications;
+}
 
 export interface NotificationItem {
   id: string;
@@ -12,16 +33,6 @@ export interface NotificationItem {
   unread: boolean;
   createdAt: number;
 }
-
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
 
 const logbookMessages = [
   "Catatan aktivitas harian telah berhasil disimpan",
@@ -55,16 +66,7 @@ function formatRelativeTime(timestamp: number): string {
 
 export const notificationService = {
   async scheduleLogbookSaved(): Promise<void> {
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: "Logbook Tersimpan",
-        body: "Catatan aktivitas harian telah berhasil disimpan",
-        sound: true,
-      },
-      trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: 1 },
-    });
-
-    await this.addToHistory({
+    await this.scheduleNotification("Logbook Tersimpan", "Catatan aktivitas harian telah berhasil disimpan", {
       type: "logbook_saved",
       title: randomItem(logbookTitles),
       message: randomItem(logbookMessages),
@@ -72,16 +74,7 @@ export const notificationService = {
   },
 
   async scheduleLogbookAdded(): Promise<void> {
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: "Aktivitas Baru",
-        body: "Aktivitas baru telah ditambahkan ke logbook Anda",
-        sound: true,
-      },
-      trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: 1 },
-    });
-
-    await this.addToHistory({
+    await this.scheduleNotification("Aktivitas Baru", "Aktivitas baru telah ditambahkan ke logbook Anda", {
       type: "logbook_added",
       title: "Aktivitas Baru",
       message: "Aktivitas baru telah ditambahkan ke logbook Anda",
@@ -89,20 +82,26 @@ export const notificationService = {
   },
 
   async scheduleLogbookDeleted(): Promise<void> {
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: "Logbook Dihapus",
-        body: "Logbook berhasil dihapus",
-        sound: true,
-      },
-      trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: 1 },
-    });
-
-    await this.addToHistory({
+    await this.scheduleNotification("Logbook Dihapus", "Logbook berhasil dihapus", {
       type: "logbook_deleted",
       title: "Logbook Dihapus",
       message: "Logbook berhasil dihapus",
     });
+  },
+
+  async scheduleNotification(title: string, body: string, historyItem: Omit<NotificationItem, "id" | "time" | "unread" | "createdAt">): Promise<void> {
+    const mod = await loadNotifications();
+    if (mod) {
+      try {
+        await mod.scheduleNotificationAsync({
+          content: { title, body, sound: true },
+          trigger: { type: mod.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: 1 },
+        });
+      } catch (e) {
+        console.log("Failed to schedule notification:", e);
+      }
+    }
+    await this.addToHistory(historyItem);
   },
 
   async addToHistory(item: Omit<NotificationItem, "id" | "time" | "unread" | "createdAt">): Promise<void> {

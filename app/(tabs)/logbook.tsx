@@ -1,4 +1,4 @@
-import { ActivityCard, ActivityDetailModal, PrintPreviewModal, type Activity } from "@/components";
+import { ActivityCard, ActivityDetailModal, PrintPreviewModal, CalendarCard, type Activity } from "@/components";
 import { getThemeColors } from "@/constants/theme";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useFadeInOnFocus } from "@/hooks/useFadeInOnFocus";
@@ -9,7 +9,7 @@ import * as Haptics from "expo-haptics";
 import * as Print from "expo-print";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
-import { ArrowLeft, ChevronLeft, ChevronRight, Plus, X } from "lucide-react-native";
+import { ArrowLeft, Plus, X } from "lucide-react-native";
 import React, { useEffect, useState, useCallback } from "react";
 import { Alert } from "react-native";
 import logbookService from "@/services/logbook";
@@ -18,7 +18,6 @@ import notificationService from "@/services/notifications";
 import { Tupoksi, Logbook as LogbookType } from "@/services/types";
 import {
   Animated,
-  Dimensions,
   Modal,
   RefreshControl,
   ScrollView,
@@ -30,9 +29,9 @@ import {
   View,
 } from "react-native";
 
-const { width: W } = Dimensions.get("window");
 
-const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+
+
 
 export default function LogbookScreen() {
   const router = useRouter();
@@ -103,7 +102,6 @@ export default function LogbookScreen() {
   const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [previewActivities, setPreviewActivities] = useState<Activity[]>([]);
 
-  void W;
   void fontsLoaded;
 
   const getStatusText = (status: string) => {
@@ -220,16 +218,7 @@ export default function LogbookScreen() {
     setShowPrintPreview(true);
   };
 
-  const getDaysInMonth = (date: Date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    return { firstDay, daysInMonth };
-  };
-
   const locale = settings.language === "id" ? "id-ID" : "en-US";
-  const { firstDay, daysInMonth } = getDaysInMonth(currentDate);
   const monthYear = currentDate.toLocaleDateString(locale, {
     month: "long",
     year: "numeric",
@@ -253,40 +242,6 @@ export default function LogbookScreen() {
     } catch (err) {
       console.log("Document picker error:", err);
     }
-  };
-
-  const renderCalendar = () => {
-    const days = [];
-    // Empty cells for days before start of month
-    for (let i = 0; i < firstDay; i++) {
-      days.push(<View key={`empty-${i}`} style={s.dayCell} />);
-    }
-    // Days of month
-    for (let day = 1; day <= daysInMonth; day++) {
-      const isToday =
-        new Date().getDate() === day &&
-        new Date().getMonth() === currentDate.getMonth() &&
-        new Date().getFullYear() === currentDate.getFullYear();
-      void isToday;
-      const isSelected = selectedDate.getDate() === day && selectedDate.getMonth() === currentDate.getMonth();
-      const hasActivity = day === 1 || day === 2; // Sample data
-
-      days.push(
-        <TouchableOpacity
-          key={day}
-          style={[s.dayCell, isSelected && s.daySelected]}
-          onPress={() => {
-            const newDate = new Date(currentDate);
-            newDate.setDate(day);
-            setSelectedDate(newDate);
-          }}
-        >
-          <Text style={[s.dayText, isSelected && s.dayTextSelected]}>{day}</Text>
-          {hasActivity && <View style={s.activityDot} />}
-        </TouchableOpacity>,
-      );
-    }
-    return days;
   };
 
   const onRefresh = createRefreshHandler(
@@ -352,34 +307,20 @@ export default function LogbookScreen() {
           </View>
 
           {/* Calendar Card */}
-          <View style={s.calendarCard}>
-            {/* Month Navigation */}
-            <View style={s.monthNav}>
-              <TouchableOpacity
-                onPress={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
-              >
-                <ChevronLeft size={24} color={C.textDark} />
-              </TouchableOpacity>
-              <Text style={s.monthText}>{monthYear.charAt(0).toUpperCase() + monthYear.slice(1)}</Text>
-              <TouchableOpacity
-                onPress={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
-              >
-                <ChevronRight size={24} color={C.textDark} />
-              </TouchableOpacity>
-            </View>
-
-            {/* Day Headers */}
-            <View style={s.dayHeaders}>
-              {DAYS.map((day) => (
-                <Text key={day} style={s.dayHeaderText}>
-                  {day}
-                </Text>
-              ))}
-            </View>
-
-            {/* Calendar Grid */}
-            <View style={s.calendarGrid}>{renderCalendar()}</View>
-          </View>
+          <CalendarCard
+            currentDate={currentDate}
+            selectedDate={selectedDate}
+            monthYear={monthYear}
+            onPrevMonth={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
+            onNextMonth={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
+            onSelectDay={(day) => {
+              const newDate = new Date(currentDate);
+              newDate.setDate(day);
+              setSelectedDate(newDate);
+            }}
+            isDark={isDark}
+            highContrast={settings.highContrast}
+          />
 
           {/* Selected Date Activities */}
           <View style={s.activitiesSection}>
@@ -663,73 +604,7 @@ const getStyles = (C: ReturnType<typeof getThemeColors>) =>
       opacity: 0.9,
     },
 
-    // Calendar Card
-    calendarCard: {
-      backgroundColor: C.cardBg,
-      marginHorizontal: 16,
-      marginTop: -15,
-      borderRadius: 20,
-      padding: 20,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 8,
-      elevation: 4,
-    },
-    monthNav: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 20,
-    },
-    monthText: {
-      fontSize: 16,
-      fontFamily: "Inter-Bold",
-      color: C.textDark,
-      textTransform: "capitalize",
-    },
-    dayHeaders: {
-      flexDirection: "row",
-      justifyContent: "space-around",
-      marginBottom: 10,
-    },
-    dayHeaderText: {
-      fontSize: 12,
-      color: C.textLight,
-      fontFamily: "Magra-Regular",
-      width: 36,
-      textAlign: "center",
-    },
-    calendarGrid: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-    },
-    dayCell: {
-      width: 36,
-      height: 36,
-      justifyContent: "center",
-      alignItems: "center",
-      margin: 2,
-    },
-    daySelected: {
-      backgroundColor: C.orange,
-      borderRadius: 18,
-    },
-    dayText: {
-      fontSize: 13,
-      color: C.textDark,
-      fontFamily: "Inter-Bold",
-    },
-    dayTextSelected: {
-      color: C.white,
-    },
-    activityDot: {
-      width: 4,
-      height: 4,
-      borderRadius: 2,
-      backgroundColor: C.orange,
-      marginTop: 2,
-    },
+
 
     // Activities Section
     activitiesSection: {
