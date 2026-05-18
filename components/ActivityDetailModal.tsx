@@ -1,8 +1,8 @@
 import { getThemeColors } from "@/constants/theme";
 import { useSettings } from "@/contexts/SettingsContext";
-import { Printer, X } from "lucide-react-native";
+import { Printer, Trash2, X } from "lucide-react-native";
 import React from "react";
-import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Activity } from "./ActivityCard";
 
 interface ActivityDetailModalProps {
@@ -12,6 +12,7 @@ interface ActivityDetailModalProps {
   reducedMotion?: boolean;
   onClose: () => void;
   onPrint: (activity: Activity) => void;
+  onDelete?: (activity: Activity) => void;
   getStatusText: (status: string) => string;
   getStatusColor: (status: string) => string;
 }
@@ -23,6 +24,7 @@ export function ActivityDetailModal({
   reducedMotion = false,
   onClose,
   onPrint,
+  onDelete,
   getStatusText,
   getStatusColor,
 }: ActivityDetailModalProps) {
@@ -80,16 +82,44 @@ export function ActivityDetailModal({
                   </View>
                 )}
 
-                <TouchableOpacity
-                  style={s.printSingleBtn}
-                  onPress={() => {
-                    onClose();
-                    onPrint(activity);
-                  }}
-                >
-                  <Printer size={18} color={C.white} />
-                  <Text style={s.printSingleBtnText}>{t("print_log")}</Text>
-                </TouchableOpacity>
+                <View style={s.actionRow}>
+                  <TouchableOpacity
+                    style={s.printSingleBtn}
+                    onPress={() => {
+                      onClose();
+                      onPrint(activity);
+                    }}
+                  >
+                    <Printer size={18} color={C.white} />
+                    <Text style={s.printSingleBtnText}>{t("print_log")}</Text>
+                  </TouchableOpacity>
+
+                  {onDelete && (
+                    <TouchableOpacity
+                      style={s.deleteBtn}
+                      onPress={() => {
+                        Alert.alert(
+                          "Delete Logbook",
+                          "Are you sure you want to delete this logbook entry?",
+                          [
+                            { text: "Cancel", style: "cancel" },
+                            {
+                              text: "Delete",
+                              style: "destructive",
+                              onPress: () => {
+                                onClose();
+                                onDelete(activity);
+                              },
+                            },
+                          ],
+                        );
+                      }}
+                    >
+                      <Trash2 size={18} color={C.white} />
+                      <Text style={s.printSingleBtnText}>{t("delete")}</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
               </>
             )}
             <View style={{ height: 40 }} />
@@ -157,7 +187,13 @@ const getStyles = (C: ReturnType<typeof getThemeColors>) =>
       fontSize: 12,
       fontFamily: "Inter-Bold",
     },
+    actionRow: {
+      flexDirection: "row",
+      gap: 12,
+      marginTop: 20,
+    },
     printSingleBtn: {
+      flex: 1,
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
@@ -165,7 +201,16 @@ const getStyles = (C: ReturnType<typeof getThemeColors>) =>
       backgroundColor: C.orange,
       paddingVertical: 14,
       borderRadius: 25,
-      marginTop: 20,
+    },
+    deleteBtn: {
+      flex: 1,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      backgroundColor: C.red,
+      paddingVertical: 14,
+      borderRadius: 25,
     },
     printSingleBtnText: {
       fontSize: 14,

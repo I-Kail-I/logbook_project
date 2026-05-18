@@ -420,6 +420,17 @@ export default function LogbookScreen() {
         reducedMotion={settings.reducedMotion}
         onClose={() => setDetailActivity(null)}
         onPrint={(activity) => openPrintPreview([activity])}
+        onDelete={async (activity) => {
+          const nip = await storage.getNip();
+          if (!nip) return;
+          const result = await logbookService.deleteLogbook(String(activity.id), nip);
+          if (result.success) {
+            await notificationService.scheduleLogbookDeleted();
+            fetchLogbooks();
+          } else {
+            Alert.alert("Error", result.message || "Failed to delete logbook");
+          }
+        }}
         getStatusText={getStatusText}
         getStatusColor={getStatusColor}
       />

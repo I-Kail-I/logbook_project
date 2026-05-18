@@ -3,6 +3,7 @@ import {
   Logbook,
   LogbookFormData,
   CreateLogbookResponse,
+  DeleteLogbookResponse,
   GetLogbookResponse,
   GetTupoksiResponse,
   Tupoksi,
@@ -103,6 +104,33 @@ export const logbook = {
       return {
         success: false,
         message: error.response?.data?.message || "Failed to create logbook",
+      };
+    }
+  },
+
+  async deleteLogbook(idLogbook: string, nip?: string): Promise<DeleteLogbookResponse> {
+    try {
+      const userNip = nip || (await storage.getNip());
+      if (!userNip) {
+        return { success: false, message: "User not logged in" };
+      }
+
+      const formData = new FormData();
+      formData.append("nip", userNip);
+      formData.append("idLogbook", idLogbook);
+
+      const response = await api.post<DeleteLogbookResponse>("/api-delete-logbooksss", formData, {
+        headers: {
+          ...API_HEADERS,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      return response.data;
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Failed to delete logbook",
       };
     }
   },

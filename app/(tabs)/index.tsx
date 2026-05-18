@@ -10,7 +10,7 @@ import { useRouter } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { BarChart3, Bell, Calendar, Check, FileText, Plus, Printer, X } from "lucide-react-native";
 import React, { useCallback, useEffect, useState } from "react";
-import { Animated, Dimensions, Image, RefreshControl, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Animated, Dimensions, Image, RefreshControl, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import logbookService from "@/services/logbook";
 import storage from "@/services/storage";
 import auth from "@/services/auth";
@@ -419,6 +419,17 @@ export default function DashboardScreen() {
         reducedMotion={settings.reducedMotion}
         onClose={() => setDetailActivity(null)}
         onPrint={(activity) => openPrintPreview([activity])}
+        onDelete={async (activity) => {
+          const nip = await storage.getNip();
+          if (!nip) return;
+          const result = await logbookService.deleteLogbook(String(activity.id), nip);
+          if (result.success) {
+            await notificationService.scheduleLogbookDeleted();
+            fetchLogbooks();
+          } else {
+            Alert.alert("Error", result.message || "Failed to delete logbook");
+          }
+        }}
         getStatusText={getStatusText}
         getStatusColor={getStatusColor}
       />

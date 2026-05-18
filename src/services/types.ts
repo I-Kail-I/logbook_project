@@ -67,6 +67,11 @@ export interface GetTupoksiResponse {
   message?: string;
 }
 
+export interface DeleteLogbookResponse {
+  success: boolean;
+  message?: string;
+}
+
 export interface Statistics {
   totalLogbook: number;
   thisMonth: number;

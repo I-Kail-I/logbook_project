@@ -5,7 +5,7 @@ const HISTORY_KEY = "@notification_history";
 
 export interface NotificationItem {
   id: string;
-  type: "logbook_saved" | "logbook_added" | "reminder";
+  type: "logbook_saved" | "logbook_added" | "logbook_deleted" | "reminder";
   title: string;
   message: string;
   time: string;
@@ -85,6 +85,23 @@ export const notificationService = {
       type: "logbook_added",
       title: "Aktivitas Baru",
       message: "Aktivitas baru telah ditambahkan ke logbook Anda",
+    });
+  },
+
+  async scheduleLogbookDeleted(): Promise<void> {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "Logbook Dihapus",
+        body: "Logbook berhasil dihapus",
+        sound: true,
+      },
+      trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: 1 },
+    });
+
+    await this.addToHistory({
+      type: "logbook_deleted",
+      title: "Logbook Dihapus",
+      message: "Logbook berhasil dihapus",
     });
   },
 
